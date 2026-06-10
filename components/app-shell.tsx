@@ -1,9 +1,10 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Building2, LayoutDashboard, FilePlus2, Settings } from "lucide-react"
+import { LayoutDashboard, FilePlus2, Settings } from "lucide-react"
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -17,11 +18,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background md:flex-row">
       {/* Sidebar desktop */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-border/60 bg-card md:flex">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-card md:flex">
         <div className="flex items-center gap-3 border-b border-border/60 px-5 py-5">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Building2 className="size-5" />
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white p-1 shadow-sm">
+            <Image
+              src="/money-flip-logo.png"
+              alt="Money Flip Logo"
+              width={44}
+              height={44}
+              className="h-auto w-auto"
+              priority
+            />
           </div>
+
           <div className="flex flex-col">
             <span className="text-sm font-semibold leading-tight text-foreground">
               Money Flip
@@ -56,9 +65,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile header */}
       <header className="flex items-center gap-3 border-b border-border/60 bg-card px-4 py-4 md:hidden">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Building2 className="size-4" />
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white p-1 shadow-sm">
+          <Image
+            src="/money-flip-logo.png"
+            alt="Money Flip Logo"
+            width={36}
+            height={36}
+            className="h-auto w-auto"
+            priority
+          />
         </div>
+
         <span className="text-sm font-semibold text-foreground">
           Money Flip Deal Analyzer
         </span>
