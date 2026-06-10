@@ -108,6 +108,7 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
     const usableComps = comps.filter((comp) => comp.soldPrice > 0 && comp.sqft > 0)
 
     const pricePerSqftValues = usableComps.map((comp) => comp.soldPrice / comp.sqft)
+
     const averagePricePerSqft =
       pricePerSqftValues.length > 0
         ? pricePerSqftValues.reduce((sum, value) => sum + value, 0) / pricePerSqftValues.length
@@ -335,6 +336,7 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
                   label="Distance"
                   suffix="mi"
                   value={comp.distance}
+                  allowDecimal
                   onValueChange={(v) => updateComp(comp.id, { distance: v })}
                 />
 
