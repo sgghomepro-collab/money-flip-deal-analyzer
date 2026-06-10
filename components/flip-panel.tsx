@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { NumberField, ResultCard, ResultRow, YellowNotice } from "@/components/deal-fields"
 import { CoachNotes, DecisionBanner, OfferEmail } from "@/components/deal-shared"
+import { ArvCompsAnalyzer } from "@/components/arv-comps-analyzer"
 
 export function FlipPanel({ property }: { property: PropertyInfo }) {
   const [inputs, setInputs] = useState<FlipInputs>(FLIP_DEFAULTS)
@@ -25,128 +26,132 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Inputs */}
-      <Card className="border-border/60">
-        <CardHeader>
-          <CardTitle className="text-lg">Project Inputs</CardTitle>
-          <CardDescription>Only change the yellow fields.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-5">
-          <YellowNotice />
+      <div className="flex flex-col gap-6">
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle className="text-lg">Project Inputs</CardTitle>
+            <CardDescription>Only change the yellow fields.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5">
+            <YellowNotice />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <NumberField
-              id="f-timeline"
-              label="Project Timeline in Months"
-              suffix="mo"
-              value={inputs.timelineMonths}
-              onValueChange={(v) => set({ timelineMonths: v })}
-            />
-            <NumberField
-              id="f-arv"
-              label="ARV"
-              prefix="$"
-              value={inputs.arv}
-              onValueChange={(v) => set({ arv: v })}
-            />
-            <NumberField
-              id="f-discount"
-              label="Discount Applied to ARV"
-              suffix="%"
-              value={inputs.discountPercent}
-              onValueChange={(v) => set({ discountPercent: v })}
-            />
-            <NumberField
-              id="f-reno"
-              label="Renovation Budget"
-              prefix="$"
-              value={inputs.renovationBudget}
-              onValueChange={(v) => set({ renovationBudget: v })}
-            />
-          </div>
-
-          <div className="rounded-lg border border-border/60 p-4">
-            <p className="mb-3 text-sm font-medium text-foreground">Hard Money Loan</p>
-            <p className="mb-3 text-xs text-muted-foreground">
-              En el Money Flip Method, el prestamista financia el 100% de las reparaciones.
-            </p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumberField
-                id="f-down"
-                label="HML Down Payment"
-                suffix="%"
-                value={inputs.downPaymentPercent}
-                onValueChange={(v) => set({ downPaymentPercent: v })}
+                id="f-timeline"
+                label="Project Timeline in Months"
+                suffix="mo"
+                value={inputs.timelineMonths}
+                onValueChange={(v) => set({ timelineMonths: v })}
               />
               <NumberField
-                id="f-points"
-                label="HML Points"
-                suffix="%"
-                value={inputs.pointsPercent}
-                onValueChange={(v) => set({ pointsPercent: v })}
-              />
-              <NumberField
-                id="f-interest"
-                label="HML Annual Interest Rate"
-                suffix="%"
-                value={inputs.annualInterestPercent}
-                onValueChange={(v) => set({ annualInterestPercent: v })}
-              />
-              <NumberField
-                id="f-admin"
-                label="HML Admin Fee"
+                id="f-arv"
+                label="ARV"
                 prefix="$"
-                value={inputs.hmlAdminFee}
-                onValueChange={(v) => set({ hmlAdminFee: v })}
+                value={inputs.arv}
+                onValueChange={(v) => set({ arv: v })}
+              />
+              <NumberField
+                id="f-discount"
+                label="Discount Applied to ARV"
+                suffix="%"
+                value={inputs.discountPercent}
+                onValueChange={(v) => set({ discountPercent: v })}
+              />
+              <NumberField
+                id="f-reno"
+                label="Renovation Budget"
+                prefix="$"
+                value={inputs.renovationBudget}
+                onValueChange={(v) => set({ renovationBudget: v })}
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <NumberField
-              id="f-purchase-closing"
-              label="Purchase Closing Cost"
-              suffix="%"
-              value={inputs.purchaseClosingPercent}
-              onValueChange={(v) => set({ purchaseClosingPercent: v })}
-            />
-            <NumberField
-              id="f-realtor"
-              label="Sale Realtor Cost"
-              suffix="%"
-              value={inputs.saleRealtorPercent}
-              onValueChange={(v) => set({ saleRealtorPercent: v })}
-            />
-            <NumberField
-              id="f-sale-closing"
-              label="Sale Closing Cost"
-              suffix="%"
-              value={inputs.saleClosingPercent}
-              onValueChange={(v) => set({ saleClosingPercent: v })}
-            />
-            <NumberField
-              id="f-holding"
-              label="Holding Costs During Project"
-              prefix="$"
-              value={inputs.holdingCosts}
-              onValueChange={(v) => set({ holdingCosts: v })}
-            />
-            <NumberField
-              id="f-unexpected"
-              label="Unexpected Costs"
-              prefix="$"
-              value={inputs.unexpectedCosts}
-              onValueChange={(v) => set({ unexpectedCosts: v })}
-            />
-            <NumberField
-              id="f-roi"
-              label="Minimum Expected ROI"
-              suffix="%"
-              value={inputs.minRoiPercent}
-              onValueChange={(v) => set({ minRoiPercent: v })}
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div className="rounded-lg border border-border/60 p-4">
+              <p className="mb-3 text-sm font-medium text-foreground">Hard Money Loan</p>
+              <p className="mb-3 text-xs text-muted-foreground">
+                En el Money Flip Method, el prestamista financia el 100% de las reparaciones.
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <NumberField
+                  id="f-down"
+                  label="HML Down Payment"
+                  suffix="%"
+                  value={inputs.downPaymentPercent}
+                  onValueChange={(v) => set({ downPaymentPercent: v })}
+                />
+                <NumberField
+                  id="f-points"
+                  label="HML Points"
+                  suffix="%"
+                  value={inputs.pointsPercent}
+                  onValueChange={(v) => set({ pointsPercent: v })}
+                />
+                <NumberField
+                  id="f-interest"
+                  label="HML Annual Interest Rate"
+                  suffix="%"
+                  value={inputs.annualInterestPercent}
+                  onValueChange={(v) => set({ annualInterestPercent: v })}
+                />
+                <NumberField
+                  id="f-admin"
+                  label="HML Admin Fee"
+                  prefix="$"
+                  value={inputs.hmlAdminFee}
+                  onValueChange={(v) => set({ hmlAdminFee: v })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <NumberField
+                id="f-purchase-closing"
+                label="Purchase Closing Cost"
+                suffix="%"
+                value={inputs.purchaseClosingPercent}
+                onValueChange={(v) => set({ purchaseClosingPercent: v })}
+              />
+              <NumberField
+                id="f-realtor"
+                label="Sale Realtor Cost"
+                suffix="%"
+                value={inputs.saleRealtorPercent}
+                onValueChange={(v) => set({ saleRealtorPercent: v })}
+              />
+              <NumberField
+                id="f-sale-closing"
+                label="Sale Closing Cost"
+                suffix="%"
+                value={inputs.saleClosingPercent}
+                onValueChange={(v) => set({ saleClosingPercent: v })}
+              />
+              <NumberField
+                id="f-holding"
+                label="Holding Costs During Project"
+                prefix="$"
+                value={inputs.holdingCosts}
+                onValueChange={(v) => set({ holdingCosts: v })}
+              />
+              <NumberField
+                id="f-unexpected"
+                label="Unexpected Costs"
+                prefix="$"
+                value={inputs.unexpectedCosts}
+                onValueChange={(v) => set({ unexpectedCosts: v })}
+              />
+              <NumberField
+                id="f-roi"
+                label="Minimum Expected ROI"
+                suffix="%"
+                value={inputs.minRoiPercent}
+                onValueChange={(v) => set({ minRoiPercent: v })}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <ArvCompsAnalyzer onUseArv={(arv) => set({ arv })} />
+      </div>
 
       {/* Results */}
       <div className="flex flex-col gap-6">

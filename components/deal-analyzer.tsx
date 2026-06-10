@@ -6,8 +6,7 @@ import { WholesalePanel } from "@/components/wholesale-panel"
 import { FlipPanel } from "@/components/flip-panel"
 import { HoldPanel } from "@/components/hold-panel"
 import { PropertyInfoCard } from "@/components/deal-shared"
-import { SaveAnalysisButton } from "@/components/deal-history"
-import { PROPERTY_DEFAULTS, formatProperty, type PropertyInfo } from "@/lib/deal-analyzer"
+import { PROPERTY_DEFAULTS, type PropertyInfo } from "@/lib/deal-analyzer"
 
 export function DealAnalyzer() {
   const [property, setProperty] = useState<PropertyInfo>(PROPERTY_DEFAULTS)
@@ -15,8 +14,6 @@ export function DealAnalyzer() {
   function updateProperty(next: Partial<PropertyInfo>) {
     setProperty((prev) => ({ ...prev, ...next }))
   }
-
-  const propertyLabel = formatProperty(property)
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,17 +35,15 @@ export function DealAnalyzer() {
         <TabsContent value="wholesaling">
           <WholesalePanel property={property} />
         </TabsContent>
+
         <TabsContent value="fix-and-flip">
           <FlipPanel property={property} />
         </TabsContent>
+
         <TabsContent value="buy-and-hold">
           <HoldPanel property={property} />
         </TabsContent>
       </Tabs>
-
-      <div className="mt-2">
-        <SaveAnalysisButton propertyLabel={propertyLabel} />
-      </div>
     </div>
   )
 }
