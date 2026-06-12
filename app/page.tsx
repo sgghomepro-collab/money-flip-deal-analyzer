@@ -15,18 +15,21 @@ const STRATEGIES = [
     description:
       "Calculate your seller offer, assignment fee, and maximum allowable offer.",
     icon: KeyRound,
+    href: "/new-analysis?strategy=wholesaling",
   },
   {
     title: "Fix & Flip",
     description:
       "Estimate your offer, capital needed, carrying costs, cash back, net profit, and ROI.",
     icon: Hammer,
+    href: "/new-analysis?strategy=fix-and-flip",
   },
   {
     title: "Buy & Hold",
     description:
       "Analyze rent, expenses, cash flow, cap rate, and cash-on-cash return.",
     icon: Home,
+    href: "/new-analysis?strategy=buy-and-hold",
   },
 ]
 
@@ -44,7 +47,7 @@ export default function DashboardPage() {
         </div>
 
         <Button asChild>
-          <Link href="/new-analysis">
+          <Link href="/new-analysis?strategy=wholesaling">
             <FilePlus2 className="size-4" />
             New Analysis
           </Link>
@@ -66,7 +69,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href="/new-analysis">Analyze Deal</Link>
+                  <Link href={strategy.href}>Analyze Deal</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -82,18 +85,10 @@ export default function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm text-muted-foreground">
-          <p>
-            1. Enter the property address and basic details.
-          </p>
-          <p>
-            2. Choose Wholesaling, Fix & Flip, or Buy & Hold.
-          </p>
-          <p>
-            3. Review the offer, profit, cash flow, or ROI before contacting the seller.
-          </p>
-          <p>
-            4. Use the offer email section to communicate professionally.
-          </p>
+          <p>1. Enter the property address and basic details.</p>
+          <p>2. Choose Wholesaling, Fix & Flip, or Buy & Hold.</p>
+          <p>3. Review the offer, profit, cash flow, or ROI before contacting the seller.</p>
+          <p>4. Use the offer email section to communicate professionally.</p>
         </CardContent>
       </Card>
     </div>
