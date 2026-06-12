@@ -61,6 +61,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
             <CardTitle className="text-lg">Project Inputs</CardTitle>
             <CardDescription>Only change the yellow fields.</CardDescription>
           </CardHeader>
+
           <CardContent className="flex flex-col gap-5">
             <YellowNotice />
 
@@ -86,7 +87,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 label="Actual Sale Price"
                 prefix="$"
                 value={inputs.actualSalePrice}
-                hint="Leave blank or 0 to use ARV as the projected sale price."
+                hint="Optional. Leave blank or 0 to use ARV as the projected sale price."
                 onValueChange={(v) => set({ actualSalePrice: v })}
               />
 
@@ -145,6 +146,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                       onBlur={normalizeAnnualInterest}
                       className="h-full min-w-0 flex-1 bg-transparent px-3 text-foreground outline-none"
                     />
+
                     <div className="flex items-center border-l border-yellow-400/70 px-3 text-muted-foreground">
                       %
                     </div>
@@ -282,6 +284,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Offer & Hard Money Loan
               </p>
+
               <ResultRow label="ARV" value={formatCurrency(inputs.arv)} />
               <ResultRow label="Actual Sale Price" value={formatCurrency(inputs.actualSalePrice)} />
               <ResultRow label="Sale Price Used" value={formatCurrency(r.salePriceUsed)} />
@@ -297,6 +300,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Hard Money Costs
               </p>
+
               <ResultRow label="HML Origination Points" value={formatCurrency(r.originationPoints)} />
               <ResultRow label="HML Interest" value={formatCurrency(r.hmlInterest)} />
               <ResultRow label="Total HML Expenses" value={formatCurrency(r.totalHmlExpenses)} />
@@ -306,6 +310,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Purchase & Sale Costs
               </p>
+
               <ResultRow label="Purchase Closing Cost Base" value={formatCurrency(r.purchaseClosingCostBase)} />
               <ResultRow label="Purchase Closing Costs (incl. points)" value={formatCurrency(r.purchaseClosingCosts)} />
               <ResultRow label="Sale Realtor Costs" value={formatCurrency(r.saleRealtorCosts)} />
