@@ -43,6 +43,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={inputs.timelineMonths}
                 onValueChange={(v) => set({ timelineMonths: v })}
               />
+
               <NumberField
                 id="f-arv"
                 label="ARV"
@@ -50,6 +51,16 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={inputs.arv}
                 onValueChange={(v) => set({ arv: v })}
               />
+
+              <NumberField
+                id="f-actual-sale-price"
+                label="Actual Sale Price"
+                prefix="$"
+                value={inputs.actualSalePrice}
+                hint="Leave blank or 0 to use ARV as the projected sale price."
+                onValueChange={(v) => set({ actualSalePrice: v })}
+              />
+
               <NumberField
                 id="f-discount"
                 label="Discount Applied to ARV"
@@ -57,6 +68,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={inputs.discountPercent}
                 onValueChange={(v) => set({ discountPercent: v })}
               />
+
               <NumberField
                 id="f-reno"
                 label="Renovation Budget"
@@ -71,6 +83,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
               <p className="mb-3 text-xs text-muted-foreground">
                 En el Money Flip Method, el prestamista financia el 100% de las reparaciones.
               </p>
+
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <NumberField
                   id="f-down"
@@ -79,6 +92,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                   value={inputs.downPaymentPercent}
                   onValueChange={(v) => set({ downPaymentPercent: v })}
                 />
+
                 <NumberField
                   id="f-points"
                   label="HML Points"
@@ -86,13 +100,16 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                   value={inputs.pointsPercent}
                   onValueChange={(v) => set({ pointsPercent: v })}
                 />
+
                 <NumberField
                   id="f-interest"
                   label="HML Annual Interest Rate"
                   suffix="%"
                   value={inputs.annualInterestPercent}
+                  allowDecimal
                   onValueChange={(v) => set({ annualInterestPercent: v })}
                 />
+
                 <NumberField
                   id="f-admin"
                   label="HML Admin Fee"
@@ -111,6 +128,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={inputs.purchaseClosingPercent}
                 onValueChange={(v) => set({ purchaseClosingPercent: v })}
               />
+
               <NumberField
                 id="f-realtor"
                 label="Sale Realtor Cost"
@@ -118,6 +136,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={inputs.saleRealtorPercent}
                 onValueChange={(v) => set({ saleRealtorPercent: v })}
               />
+
               <NumberField
                 id="f-sale-closing"
                 label="Sale Closing Cost"
@@ -125,6 +144,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={inputs.saleClosingPercent}
                 onValueChange={(v) => set({ saleClosingPercent: v })}
               />
+
               <NumberField
                 id="f-holding"
                 label="Holding Costs During Project"
@@ -132,6 +152,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={inputs.holdingCosts}
                 onValueChange={(v) => set({ holdingCosts: v })}
               />
+
               <NumberField
                 id="f-unexpected"
                 label="Unexpected Costs"
@@ -139,6 +160,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={inputs.unexpectedCosts}
                 onValueChange={(v) => set({ unexpectedCosts: v })}
               />
+
               <NumberField
                 id="f-roi"
                 label="Minimum Expected ROI"
@@ -160,39 +182,54 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
         <Card className="border-border/60">
           <CardHeader>
             <CardTitle className="text-lg">Deal Analysis</CardTitle>
-            <CardDescription>Calculated from your yellow fields.</CardDescription>
+            <CardDescription>
+              Calculated from your yellow fields. Actual Sale Price is used when entered.
+            </CardDescription>
           </CardHeader>
+
           <CardContent className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <ResultCard
+                label="Sale Price Used"
+                value={formatCurrency(r.salePriceUsed)}
+                hint={inputs.actualSalePrice > 0 ? "Using Actual Sale Price" : "Using ARV"}
+                emphasis="primary"
+              />
+
               <ResultCard
                 label="Net Offer / MAO"
                 value={formatCurrency(r.netOffer)}
                 hint="What you offer the seller"
                 emphasis="primary"
               />
+
               <ResultCard
                 label="Cash Back"
                 value={formatCurrency(r.cashBack)}
                 hint="Dinero que recibes al cierre de la venta: capital recuperado + ganancia neta."
                 emphasis="primary"
               />
+
               <ResultCard
                 label="Net Profit"
                 value={formatCurrency(r.netProfit)}
                 hint="Cash Back minus Cash Needed to Close"
                 emphasis="primary"
               />
+
               <ResultCard
                 label="Real ROI"
                 value={formatPercent(r.realRoi, 2)}
                 hint="Net Profit / Cash Needed to Close"
               />
+
               <ResultCard
                 label="Cash Needed to Close"
                 value={formatCurrency(r.cashToClose)}
                 hint="Out of pocket at purchase"
                 emphasis="primary"
               />
+
               <ResultCard
                 label="Minimum Profit Required"
                 value={formatCurrency(r.minProfitRequired)}
@@ -204,6 +241,9 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Offer & Hard Money Loan
               </p>
+              <ResultRow label="ARV" value={formatCurrency(inputs.arv)} />
+              <ResultRow label="Actual Sale Price" value={formatCurrency(inputs.actualSalePrice)} />
+              <ResultRow label="Sale Price Used" value={formatCurrency(r.salePriceUsed)} />
               <ResultRow label="Base Price" value={formatCurrency(r.basePrice)} />
               <ResultRow label="Net Offer" value={formatCurrency(r.netOffer)} />
               <ResultRow label="Down Payment" value={formatCurrency(r.downPayment)} />
@@ -230,6 +270,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
               <ResultRow label="Sale Realtor Costs" value={formatCurrency(r.saleRealtorCosts)} />
               <ResultRow label="Sale Closing Costs" value={formatCurrency(r.saleClosingCosts)} />
               <ResultRow label="Total Purchase and Sale Costs" value={formatCurrency(r.totalPurchaseAndSaleCosts)} />
+
               <div className="mt-1 border-t border-border/60 pt-1">
                 <ResultRow label="Total Project Cost" value={formatCurrency(r.totalProjectCost)} />
               </div>
@@ -237,26 +278,36 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
 
             <CoachNotes>
               <p>
-                Una cosa es el dinero para cerrar. Otra cosa es el capital total que necesitas para
-                mantener el proyecto. El Cash Back es lo que recibes al vender; la Ganancia Neta es lo
-                que queda después de recuperar el dinero que pusiste para cerrar.
+                Una cosa es el ARV proyectado y otra cosa es el precio real de venta. Si escribes un
+                Actual Sale Price, la calculadora usa ese valor para evaluar el resultado final del
+                proyecto.
               </p>
+
+              <p>
+                El Sale Price Used actual es {formatCurrency(r.salePriceUsed)}. Con ese escenario,
+                el Cash Back es {formatCurrency(r.cashBack)} y la Ganancia Neta es{" "}
+                {formatCurrency(r.netProfit)}.
+              </p>
+
               {r.decision === "HAY DINERO" && (
                 <p>
                   El trato pasa tu ROI mínimo de {inputs.minRoiPercent}%. Necesitas{" "}
                   {formatCurrency(r.cashToClose)} para cerrar. ¡Adelante!
                 </p>
               )}
+
               {r.decision === "REVISAR" && (
                 <p>
                   Hay ganancia, pero no llega a tu mínimo de {formatCurrency(r.minProfitRequired)}.
-                  Negocia un precio más bajo o reduce costos antes de comprometerte.
+                  Prueba un precio de venta más conservador, negocia un precio más bajo o reduce
+                  costos antes de comprometerte.
                 </p>
               )}
+
               {r.decision === "NO HAY DINERO" && (
                 <p>
                   Este trato no deja ganancia con estos números. Baja la oferta, reduce la renovación,
-                  o busca otra propiedad.
+                  sube el precio de venta esperado o busca otra propiedad.
                 </p>
               )}
             </CoachNotes>
@@ -268,13 +319,16 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
             <CardTitle className="text-lg">Carrying Costs</CardTitle>
             <CardDescription>El costo de mantener el proyecto mientras lo tienes.</CardDescription>
           </CardHeader>
+
           <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <ResultCard label="HML Interest" value={formatCurrency(r.hmlInterest)} hint="Total during project" />
+
             <ResultCard
               label="Holding Costs During Project"
               value={formatCurrency(inputs.holdingCosts)}
               hint="Taxes, utilities, insurance"
             />
+
             <ResultCard
               label="Total Carrying Costs"
               value={formatCurrency(r.totalCarryingCosts)}
@@ -291,6 +345,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
               se resta de la ganancia.
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <ResultCard
               label="Capital Total Requerido"

@@ -76,6 +76,7 @@ export interface WholesaleResults {
 export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
   const mao = i.arv * (1 - i.discountPercent / 100) - i.repairs
   const sellerOffer = mao - i.assignmentFee
+
   return {
     mao,
     sellerOffer,
@@ -97,11 +98,12 @@ export const WHOLESALE_DEFAULTS: WholesaleInputs = {
 export interface FlipInputs {
   timelineMonths: number
   arv: number
+  actualSalePrice: number // optional scenario / real closing price. If 0, ARV is used.
   discountPercent: number // applied to ARV, whole number
   renovationBudget: number
-  downPaymentPercent: number // whole number, HML down payment
-  pointsPercent: number // whole number
-  annualInterestPercent: number // whole number
+  downPaymentPercent: number // HML down payment percent
+  pointsPercent: number // HML points percent
+  annualInterestPercent: number // HML annual interest rate percent
   hmlAdminFee: number
   purchaseClosingPercent: number // whole number
   saleRealtorPercent: number // whole number
@@ -112,6 +114,7 @@ export interface FlipInputs {
 }
 
 export interface FlipResults {
+  salePriceUsed: number
   basePrice: number
   netOffer: number
   downPayment: number
@@ -138,6 +141,10 @@ export interface FlipResults {
 }
 
 export function analyzeFlip(i: FlipInputs): FlipResults {
+  // If the student enters an actual sale price, use it for final project results.
+  // If not, keep the original behavior and use ARV.
+  const salePriceUsed = i.actualSalePrice > 0 ? i.actualSalePrice : i.arv
+
   // 1. Offer
   const basePrice = i.arv * (1 - i.discountPercent / 100)
   const netOffer = basePrice - i.renovationBudget
@@ -159,10 +166,10 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
   const cashToClose = downPayment + purchaseClosingCosts + i.hmlAdminFee
 
   // 5. Sale Costs
-  const saleRealtorCosts = i.arv * (i.saleRealtorPercent / 100)
-  const saleClosingCosts = i.arv * (i.saleClosingPercent / 100)
+  const saleRealtorCosts = salePriceUsed * (i.saleRealtorPercent / 100)
+  const saleClosingCosts = salePriceUsed * (i.saleClosingPercent / 100)
 
-  // 6. Total Purchase and Sale Costs (origination points excluded; already in HML expenses)
+  // 6. Total Purchase and Sale Costs
   const totalPurchaseAndSaleCosts =
     purchaseClosingCostBase +
     saleRealtorCosts +
@@ -174,7 +181,7 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
   const totalProjectCost = totalHmlExpenses + totalPurchaseAndSaleCosts
 
   // 8. Cash Back
-  const cashBack = i.arv - totalProjectCost
+  const cashBack = salePriceUsed - totalProjectCost
 
   // 9. Net Profit
   const netProfit = cashBack - cashToClose
@@ -185,13 +192,13 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
   // 11. Minimum Profit Required
   const minProfitRequired = cashToClose * (i.minRoiPercent / 100)
 
-  // 13. Carrying Costs
+  // 12. Carrying Costs
   const totalCarryingCosts = hmlInterest + i.holdingCosts
 
-  // 14. Capital Required (liquidity only)
+  // 13. Capital Required
   const capitalRequired = cashToClose + hmlInterest + i.holdingCosts
 
-  // 12. Deal Decision
+  // 14. Deal Decision
   let decision: DealDecision
   if (netProfit <= 0) {
     decision = "NO HAY DINERO"
@@ -202,6 +209,7 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
   }
 
   return {
+    salePriceUsed,
     basePrice,
     netOffer,
     downPayment,
@@ -231,6 +239,7 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
 export const FLIP_DEFAULTS: FlipInputs = {
   timelineMonths: 4,
   arv: 200000,
+  actualSalePrice: 0,
   discountPercent: 30,
   renovationBudget: 40000,
   downPaymentPercent: 20,
@@ -291,6 +300,7 @@ export function analyzeHold(i: HoldInputs): HoldResults {
   const monthlyRate = i.interestRatePercent / 100 / 12
   const n = i.loanTermYears * 12
   let monthlyPI = 0
+
   if (loanAmount > 0 && n > 0) {
     if (monthlyRate === 0) {
       monthlyPI = loanAmount / n
@@ -425,7 +435,6 @@ export function buildOfferEmail(f: OfferEmailFields): OfferEmailResult {
       studentPhone,
     ].join("\n")
   } else {
-    // Warm & Respectful (default)
     body = [
       `Hi ${recipient},`,
       "",
