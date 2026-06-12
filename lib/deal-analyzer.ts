@@ -63,7 +63,7 @@ export function formatPercent(value: number, digits = 1): string {
 export interface WholesaleInputs {
   arv: number
   repairs: number
-  discountPercent: number // whole number, e.g. 30
+  discountPercent: number
   assignmentFee: number
 }
 
@@ -98,19 +98,19 @@ export const WHOLESALE_DEFAULTS: WholesaleInputs = {
 export interface FlipInputs {
   timelineMonths: number
   arv: number
-  actualSalePrice: number // optional scenario / real closing price. If 0, ARV is used.
-  discountPercent: number // applied to ARV, whole number
+  actualSalePrice: number
+  discountPercent: number
   renovationBudget: number
-  downPaymentPercent: number // HML down payment percent
-  pointsPercent: number // HML points percent
-  annualInterestPercent: number // HML annual interest rate percent
+  downPaymentPercent: number
+  pointsPercent: number
+  annualInterestPercent: number
   hmlAdminFee: number
-  purchaseClosingPercent: number // whole number
-  saleRealtorPercent: number // whole number
-  saleClosingPercent: number // whole number
-  holdingCosts: number // total during project
+  purchaseClosingPercent: number
+  saleRealtorPercent: number
+  saleClosingPercent: number
+  holdingCosts: number
   unexpectedCosts: number
-  minRoiPercent: number // whole number
+  minRoiPercent: number
 }
 
 export interface FlipResults {
@@ -141,8 +141,6 @@ export interface FlipResults {
 }
 
 export function analyzeFlip(i: FlipInputs): FlipResults {
-  // If the student enters an actual sale price, use it for final project results.
-  // If not, keep the original behavior and use ARV.
   const salePriceUsed = i.actualSalePrice > 0 ? i.actualSalePrice : i.arv
 
   // 1. Offer
@@ -152,7 +150,7 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
   // 2. Hard Money Loan
   const downPayment = netOffer * (i.downPaymentPercent / 100)
   const financedPurchaseAmount = netOffer - downPayment
-  const financedRepairsAmount = i.renovationBudget // lender finances 100% of renovations
+  const financedRepairsAmount = i.renovationBudget
   const loanAmount = financedPurchaseAmount + financedRepairsAmount
 
   // 3. Hard Money Costs
@@ -200,6 +198,7 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
 
   // 14. Deal Decision
   let decision: DealDecision
+
   if (netProfit <= 0) {
     decision = "NO HAY DINERO"
   } else if (netProfit >= minProfitRequired) {
@@ -260,16 +259,16 @@ export const FLIP_DEFAULTS: FlipInputs = {
 
 export interface HoldInputs {
   purchasePrice: number
-  downPaymentPercent: number // whole number
-  interestRatePercent: number // whole number
+  downPaymentPercent: number
+  interestRatePercent: number
   loanTermYears: number
-  closingPercent: number // whole number
+  closingPercent: number
   additionalCosts: number
   monthlyRent: number
-  managementPercent: number // whole number
-  taxesPercent: number // whole number, annual % of purchase price
-  insurancePercent: number // whole number, annual % of purchase price
-  reservesPercent: number // whole number of rent
+  managementPercent: number
+  taxesPercent: number
+  insurancePercent: number
+  reservesPercent: number
   hoaMonthly: number
 }
 
@@ -296,7 +295,6 @@ export function analyzeHold(i: HoldInputs): HoldResults {
   const downPayment = i.purchasePrice * (i.downPaymentPercent / 100)
   const loanAmount = i.purchasePrice - downPayment
 
-  // Standard amortization for monthly principal & interest
   const monthlyRate = i.interestRatePercent / 100 / 12
   const n = i.loanTermYears * 12
   let monthlyPI = 0
