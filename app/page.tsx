@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -47,10 +46,10 @@ export default function DashboardPage() {
         </div>
 
         <Button asChild>
-          <Link href="/new-analysis?strategy=wholesaling">
+          <a href="/new-analysis?strategy=wholesaling">
             <FilePlus2 className="size-4" />
             New Analysis
-          </Link>
+          </a>
         </Button>
       </div>
 
@@ -67,9 +66,10 @@ export default function DashboardPage() {
                 <CardTitle className="text-lg">{strategy.title}</CardTitle>
                 <CardDescription>{strategy.description}</CardDescription>
               </CardHeader>
+
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href={strategy.href}>Analyze Deal</Link>
+                  <a href={strategy.href}>Analyze Deal</a>
                 </Button>
               </CardContent>
             </Card>
@@ -84,6 +84,7 @@ export default function DashboardPage() {
             Keep it simple: enter the property numbers, choose the strategy, and use the results to make a smarter offer.
           </CardDescription>
         </CardHeader>
+
         <CardContent className="grid gap-3 text-sm text-muted-foreground">
           <p>1. Enter the property address and basic details.</p>
           <p>2. Choose Wholesaling, Fix & Flip, or Buy & Hold.</p>
