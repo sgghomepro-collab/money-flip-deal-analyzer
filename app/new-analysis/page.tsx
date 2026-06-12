@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { DealAnalyzer } from "@/components/deal-analyzer"
 
 export default function NewAnalysisPage() {
@@ -9,7 +10,10 @@ export default function NewAnalysisPage() {
           Run the numbers on any deal. Only change the yellow fields.
         </p>
       </div>
-      <DealAnalyzer />
+
+      <Suspense fallback={null}>
+        <DealAnalyzer />
+      </Suspense>
     </div>
   )
 }
