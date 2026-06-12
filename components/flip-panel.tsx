@@ -17,10 +17,39 @@ import { ArvCompsAnalyzer } from "@/components/arv-comps-analyzer"
 
 export function FlipPanel({ property }: { property: PropertyInfo }) {
   const [inputs, setInputs] = useState<FlipInputs>(FLIP_DEFAULTS)
+  const [annualInterestText, setAnnualInterestText] = useState(
+    String(FLIP_DEFAULTS.annualInterestPercent ?? 0),
+  )
+
   const r = useMemo(() => analyzeFlip(inputs), [inputs])
 
   function set(next: Partial<FlipInputs>) {
     setInputs((prev) => ({ ...prev, ...next }))
+  }
+
+  function updateAnnualInterest(value: string) {
+    const cleanValue = value.replace(",", ".")
+
+    if (!/^\d*\.?\d*$/.test(cleanValue)) return
+
+    setAnnualInterestText(cleanValue)
+
+    const parsedValue = Number.parseFloat(cleanValue)
+    set({ annualInterestPercent: Number.isFinite(parsedValue) ? parsedValue : 0 })
+  }
+
+  function normalizeAnnualInterest() {
+    if (annualInterestText.trim() === "" || annualInterestText === ".") {
+      setAnnualInterestText("0")
+      set({ annualInterestPercent: 0 })
+      return
+    }
+
+    const parsedValue = Number.parseFloat(annualInterestText)
+    const finalValue = Number.isFinite(parsedValue) ? parsedValue : 0
+
+    setAnnualInterestText(String(finalValue))
+    set({ annualInterestPercent: finalValue })
   }
 
   return (
@@ -101,14 +130,26 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                   onValueChange={(v) => set({ pointsPercent: v })}
                 />
 
-                <NumberField
-                  id="f-interest"
-                  label="HML Annual Interest Rate"
-                  suffix="%"
-                  value={inputs.annualInterestPercent}
-                  allowDecimal
-                  onValueChange={(v) => set({ annualInterestPercent: v })}
-                />
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="f-interest" className="text-sm font-medium text-foreground">
+                    HML Annual Interest Rate
+                  </label>
+
+                  <div className="flex h-10 overflow-hidden rounded-md border border-yellow-400/70 bg-yellow-50 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                    <input
+                      id="f-interest"
+                      type="text"
+                      inputMode="decimal"
+                      value={annualInterestText}
+                      onChange={(e) => updateAnnualInterest(e.target.value)}
+                      onBlur={normalizeAnnualInterest}
+                      className="h-full min-w-0 flex-1 bg-transparent px-3 text-foreground outline-none"
+                    />
+                    <div className="flex items-center border-l border-yellow-400/70 px-3 text-muted-foreground">
+                      %
+                    </div>
+                  </div>
+                </div>
 
                 <NumberField
                   id="f-admin"
@@ -356,10 +397,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
           </CardContent>
         </Card>
 
-        <OfferEmail
-          propertyAddress={formatProperty(property, "")}
-          calculatedOffer={r.netOffer}
-        />
+        <OfferEmail propertyAddress={formatProperty(property, "")} calculatedOffer={r.netOffer} />
       </div>
     </div>
   )
