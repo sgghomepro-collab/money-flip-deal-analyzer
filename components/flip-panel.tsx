@@ -29,6 +29,12 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
     setInputs((prev) => ({ ...prev, ...next }))
   }
 
+  function resetAnalysis() {
+    setInputs(FLIP_DEFAULTS)
+    setAnnualInterestText(String(FLIP_DEFAULTS.annualInterestPercent ?? 0))
+    setSummaryCopied(false)
+  }
+
   function getDealScoreCardClass() {
     if (r.dealScoreLabel === "Strong Deal") {
       return "rounded-lg border-2 border-emerald-500 bg-emerald-100 p-5 text-emerald-950 shadow-sm"
@@ -309,9 +315,15 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 </CardDescription>
               </div>
 
-              <Button type="button" size="sm" onClick={copySummary} className="w-full sm:w-auto">
-                {summaryCopied ? "Copied!" : "Copy Deal Summary"}
-              </Button>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Button type="button" variant="outline" size="sm" onClick={resetAnalysis}>
+                  Reset Analysis
+                </Button>
+
+                <Button type="button" size="sm" onClick={copySummary}>
+                  {summaryCopied ? "Copied!" : "Copy Deal Summary"}
+                </Button>
+              </div>
             </div>
           </CardHeader>
 
