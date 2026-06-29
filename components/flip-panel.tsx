@@ -29,6 +29,42 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
     setInputs((prev) => ({ ...prev, ...next }))
   }
 
+  function getDealScoreCardClass() {
+    if (r.dealScoreLabel === "Strong Deal") {
+      return "rounded-lg border-2 border-emerald-500 bg-emerald-100 p-5 text-emerald-950 shadow-sm"
+    }
+
+    if (r.dealScoreLabel === "Weak Deal") {
+      return "rounded-lg border-2 border-red-500 bg-red-100 p-5 text-red-950 shadow-sm"
+    }
+
+    return "rounded-lg border-2 border-amber-500 bg-amber-100 p-5 text-amber-950 shadow-sm"
+  }
+
+  function getDealScoreTextClass() {
+    if (r.dealScoreLabel === "Strong Deal") return "text-emerald-700"
+    if (r.dealScoreLabel === "Weak Deal") return "text-red-700"
+    return "text-amber-700"
+  }
+
+  function getDealScoreBadgeClass() {
+    if (r.dealScoreLabel === "Strong Deal") {
+      return "rounded-full border border-emerald-500 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800"
+    }
+
+    if (r.dealScoreLabel === "Weak Deal") {
+      return "rounded-full border border-red-500 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800"
+    }
+
+    return "rounded-full border border-amber-500 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800"
+  }
+
+  function getDealScoreBarClass() {
+    if (r.dealScoreLabel === "Strong Deal") return "h-full rounded-full bg-emerald-600"
+    if (r.dealScoreLabel === "Weak Deal") return "h-full rounded-full bg-red-600"
+    return "h-full rounded-full bg-amber-500"
+  }
+
   function updateAnnualInterest(value: string) {
     const cleanValue = value.replace(",", ".")
 
@@ -280,27 +316,22 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
           </CardHeader>
 
           <CardContent className="flex flex-col gap-4">
-            <div className="rounded-lg border-2 border-primary/40 bg-primary/10 p-5">
+            <div className={getDealScoreCardClass()}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
                     Deal Score
                   </p>
-                  <p className="text-4xl font-bold tabular-nums text-primary">
+                  <p className={`text-4xl font-bold tabular-nums ${getDealScoreTextClass()}`}>
                     {r.dealScore}/100
                   </p>
                 </div>
 
-                <div className="rounded-full border border-primary/30 bg-background px-4 py-2 text-sm font-semibold text-primary">
-                  {r.dealScoreLabel}
-                </div>
+                <div className={getDealScoreBadgeClass()}>{r.dealScoreLabel}</div>
               </div>
 
               <div className="mt-4 h-3 overflow-hidden rounded-full bg-background">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${r.dealScore}%` }}
-                />
+                <div className={getDealScoreBarClass()} style={{ width: `${r.dealScore}%` }} />
               </div>
             </div>
 
