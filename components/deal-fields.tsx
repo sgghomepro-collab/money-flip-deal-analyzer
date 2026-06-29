@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 // ---------------------------------------------------------------------------
-// Editable "yellow cell" fields. Anything a student should change lives here.
+// Campos editables amarillos
+// Todo lo que el alumno debe cambiar vive aquí.
 // ---------------------------------------------------------------------------
 
 const yellowFieldClass =
@@ -97,7 +98,9 @@ export function NumberField({
     allowDecimal === true ||
     suffix === "%" ||
     normalizedLabel.includes("bath") ||
-    normalizedLabel.includes("baths")
+    normalizedLabel.includes("baths") ||
+    normalizedLabel.includes("baño") ||
+    normalizedLabel.includes("baños")
 
   const [rawText, setRawText] = useState(() => {
     if (value === 0) return ""
@@ -217,7 +220,7 @@ export function NumberField({
 }
 
 // ---------------------------------------------------------------------------
-// Read-only calculated result card
+// Tarjeta de resultado calculado
 // ---------------------------------------------------------------------------
 
 interface ResultCardProps {
@@ -253,7 +256,7 @@ export function ResultCard({ label, value, hint, emphasis = "default" }: ResultC
   )
 }
 
-// Small inline read-only row, used for itemized cost breakdowns.
+// Fila pequeña de resultado calculado, usada para desgloses.
 export function ResultRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 py-1.5 text-sm">
@@ -263,12 +266,15 @@ export function ResultRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-// Helper text banner reminding students which cells to edit.
+// Aviso para recordarle al alumno cuáles campos debe editar.
 export function YellowNotice() {
   return (
     <div className="flex items-center gap-2 rounded-lg border border-editable-border bg-editable px-3 py-2 text-sm text-editable-foreground">
-      <span className="size-4 shrink-0 rounded-sm border border-editable-border bg-editable" aria-hidden />
-      <span>Only change the yellow fields. Everything else is calculated for you.</span>
+      <span
+        className="size-4 shrink-0 rounded-sm border border-editable-border bg-editable"
+        aria-hidden
+      />
+      <span>Solo cambia los campos amarillos. Todo lo demás se calcula automáticamente.</span>
     </div>
   )
 }
