@@ -25,42 +25,42 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
   }
 
   async function copySummary() {
-    const propertyAddress = formatProperty(property, "Property not entered")
+    const propertyAddress = formatProperty(property, "Propiedad no ingresada")
 
     const summary = [
-      "Money Flip - Buy & Hold Summary",
+      "Money Flip - Resumen de Buy & Hold",
       "",
-      `Property: ${propertyAddress}`,
-      `Strategy: Buy & Hold`,
+      `Propiedad: ${propertyAddress}`,
+      "Estrategia: Buy & Hold",
       "",
-      `Purchase Price: ${formatCurrency(inputs.purchasePrice)}`,
+      `Precio de Compra: ${formatCurrency(inputs.purchasePrice)}`,
       `Down Payment: ${inputs.downPaymentPercent}%`,
-      `Interest Rate: ${inputs.interestRatePercent}%`,
-      `Loan Term: ${inputs.loanTermYears} years`,
-      `Closing Costs: ${inputs.closingPercent}%`,
-      `Additional Costs: ${formatCurrency(inputs.additionalCosts)}`,
+      `Tasa de Interés: ${inputs.interestRatePercent}%`,
+      `Plazo del Préstamo: ${inputs.loanTermYears} años`,
+      `Costos de Cierre: ${inputs.closingPercent}%`,
+      `Costos Adicionales: ${formatCurrency(inputs.additionalCosts)}`,
       "",
-      `Monthly Rent: ${formatCurrency(inputs.monthlyRent)}`,
-      `Property Management: ${inputs.managementPercent}%`,
-      `Taxes Annual: ${inputs.taxesPercent}%`,
-      `Insurance Annual: ${inputs.insurancePercent}%`,
-      `Reserves: ${inputs.reservesPercent}%`,
-      `HOA Monthly: ${formatCurrency(inputs.hoaMonthly)}`,
+      `Renta Mensual: ${formatCurrency(inputs.monthlyRent)}`,
+      `Administración de la Propiedad: ${inputs.managementPercent}%`,
+      `Taxes Anuales: ${inputs.taxesPercent}%`,
+      `Seguro Anual: ${inputs.insurancePercent}%`,
+      `Reservas: ${inputs.reservesPercent}%`,
+      `HOA Mensual: ${formatCurrency(inputs.hoaMonthly)}`,
       "",
-      `Monthly Cash Flow: ${formatCurrency(r.cashFlowMonthly)}`,
-      `Annual Cash Flow: ${formatCurrency(r.cashFlowAnnual)}`,
+      `Cash Flow Mensual: ${formatCurrency(r.cashFlowMonthly)}`,
+      `Cash Flow Anual: ${formatCurrency(r.cashFlowAnnual)}`,
       `CAP Rate: ${formatPercent(r.capRate)}`,
       `Cash on Cash: ${formatPercent(r.cashOnCash)}`,
       "",
-      `Down Payment Amount: ${formatCurrency(r.downPayment)}`,
-      `Loan Amount: ${formatCurrency(r.loanAmount)}`,
-      `Monthly Principal & Interest: ${formatCurrency(r.monthlyPI)}`,
-      `Closing Costs Amount: ${formatCurrency(r.closingCosts)}`,
-      `Capital Invested: ${formatCurrency(r.capitalInvested)}`,
+      `Monto del Down Payment: ${formatCurrency(r.downPayment)}`,
+      `Monto del Préstamo: ${formatCurrency(r.loanAmount)}`,
+      `Pago Mensual Principal e Interés: ${formatCurrency(r.monthlyPI)}`,
+      `Monto de Costos de Cierre: ${formatCurrency(r.closingCosts)}`,
+      `Capital Invertido: ${formatCurrency(r.capitalInvested)}`,
       "",
-      `Total Operating Expenses: ${formatCurrency(r.totalOperatingExpenses)}`,
-      `NOI Monthly: ${formatCurrency(r.noiMonthly)}`,
-      `NOI Annual: ${formatCurrency(r.noiAnnual)}`,
+      `Total de Gastos Operativos: ${formatCurrency(r.totalOperatingExpenses)}`,
+      `NOI Mensual: ${formatCurrency(r.noiMonthly)}`,
+      `NOI Anual: ${formatCurrency(r.noiAnnual)}`,
     ].join("\n")
 
     await navigator.clipboard.writeText(summary)
@@ -77,18 +77,18 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
       {/* Inputs */}
       <Card className="border-border/60">
         <CardHeader>
-          <CardTitle className="text-lg">Rental Inputs</CardTitle>
-          <CardDescription>Only change the yellow fields.</CardDescription>
+          <CardTitle className="text-lg">Datos de Renta</CardTitle>
+          <CardDescription>Solo cambia los campos amarillos.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-5">
           <YellowNotice />
 
           <div className="rounded-lg border border-border/60 p-4">
-            <p className="mb-3 text-sm font-medium text-foreground">Purchase &amp; Financing</p>
+            <p className="mb-3 text-sm font-medium text-foreground">Compra y Financiamiento</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumberField
                 id="h-price"
-                label="Purchase Price"
+                label="Precio de Compra"
                 prefix="$"
                 value={inputs.purchasePrice}
                 onValueChange={(v) => set({ purchasePrice: v })}
@@ -102,7 +102,7 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
               />
               <NumberField
                 id="h-rate"
-                label="Interest Rate"
+                label="Tasa de Interés"
                 suffix="%"
                 allowDecimal
                 value={inputs.interestRatePercent}
@@ -110,14 +110,14 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
               />
               <NumberField
                 id="h-term"
-                label="Loan Term"
-                suffix="yr"
+                label="Plazo del Préstamo"
+                suffix="años"
                 value={inputs.loanTermYears}
                 onValueChange={(v) => set({ loanTermYears: v })}
               />
               <NumberField
                 id="h-closing"
-                label="Closing Costs"
+                label="Costos de Cierre"
                 suffix="%"
                 allowDecimal
                 value={inputs.closingPercent}
@@ -125,7 +125,7 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
               />
               <NumberField
                 id="h-additional"
-                label="Additional Costs"
+                label="Costos Adicionales"
                 prefix="$"
                 value={inputs.additionalCosts}
                 onValueChange={(v) => set({ additionalCosts: v })}
@@ -134,25 +134,25 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
           </div>
 
           <div className="rounded-lg border border-border/60 p-4">
-            <p className="mb-3 text-sm font-medium text-foreground">Income &amp; Expenses</p>
+            <p className="mb-3 text-sm font-medium text-foreground">Ingresos y Gastos</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumberField
                 id="h-rent"
-                label="Monthly Rent"
+                label="Renta Mensual"
                 prefix="$"
                 value={inputs.monthlyRent}
                 onValueChange={(v) => set({ monthlyRent: v })}
               />
               <NumberField
                 id="h-mgmt"
-                label="Property Management"
+                label="Administración de la Propiedad"
                 suffix="%"
                 value={inputs.managementPercent}
                 onValueChange={(v) => set({ managementPercent: v })}
               />
               <NumberField
                 id="h-taxes"
-                label="Taxes (annual)"
+                label="Taxes Anuales"
                 suffix="%"
                 allowDecimal
                 value={inputs.taxesPercent}
@@ -160,7 +160,7 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
               />
               <NumberField
                 id="h-insurance"
-                label="Insurance (annual)"
+                label="Seguro Anual"
                 suffix="%"
                 allowDecimal
                 value={inputs.insurancePercent}
@@ -168,14 +168,14 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
               />
               <NumberField
                 id="h-reserves"
-                label="Reserves"
+                label="Reservas"
                 suffix="%"
                 value={inputs.reservesPercent}
                 onValueChange={(v) => set({ reservesPercent: v })}
               />
               <NumberField
                 id="h-hoa"
-                label="HOA Monthly"
+                label="HOA Mensual"
                 prefix="$"
                 value={inputs.hoaMonthly}
                 onValueChange={(v) => set({ hoaMonthly: v })}
@@ -191,12 +191,12 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle className="text-lg">Deal Analysis</CardTitle>
-                <CardDescription>Calculated from your yellow fields.</CardDescription>
+                <CardTitle className="text-lg">Análisis del Trato</CardTitle>
+                <CardDescription>Calculado según los campos amarillos.</CardDescription>
               </div>
 
               <Button type="button" size="sm" onClick={copySummary} className="w-full sm:w-auto">
-                {summaryCopied ? "Copied!" : "Copy Deal Summary"}
+                {summaryCopied ? "Copiado" : "Copiar Resumen"}
               </Button>
             </div>
           </CardHeader>
@@ -204,51 +204,57 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
           <CardContent className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <ResultCard
-                label="Monthly Cash Flow"
+                label="Cash Flow Mensual"
                 value={formatCurrency(r.cashFlowMonthly)}
-                hint={cashFlowPositive ? "Positive cash flow" : "Negative cash flow"}
+                hint={cashFlowPositive ? "Flujo de caja positivo." : "Flujo de caja negativo."}
                 emphasis="primary"
               />
               <ResultCard
-                label="Annual Cash Flow"
+                label="Cash Flow Anual"
                 value={formatCurrency(r.cashFlowAnnual)}
-                hint="Cash flow x 12"
+                hint="Cash flow mensual x 12."
               />
               <ResultCard
                 label="CAP Rate"
                 value={formatPercent(r.capRate)}
-                hint="NOI / purchase price"
+                hint="NOI anual / precio de compra."
               />
               <ResultCard
                 label="Cash on Cash"
                 value={formatPercent(r.cashOnCash)}
-                hint="Annual cash flow / capital invested"
+                hint="Cash flow anual / capital invertido."
               />
             </div>
 
             <div className="rounded-lg border border-border/60 bg-muted/40 p-4">
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Financing &amp; Capital
+                Financiamiento y Capital
               </p>
               <ResultRow label="Down Payment" value={formatCurrency(r.downPayment)} />
-              <ResultRow label="Loan Amount" value={formatCurrency(r.loanAmount)} />
-              <ResultRow label="Monthly Principal & Interest" value={formatCurrency(r.monthlyPI)} />
-              <ResultRow label="Closing Costs" value={formatCurrency(r.closingCosts)} />
-              <ResultRow label="Capital Invested" value={formatCurrency(r.capitalInvested)} />
+              <ResultRow label="Monto del Préstamo" value={formatCurrency(r.loanAmount)} />
+              <ResultRow label="Pago Mensual Principal e Interés" value={formatCurrency(r.monthlyPI)} />
+              <ResultRow label="Costos de Cierre" value={formatCurrency(r.closingCosts)} />
+              <ResultRow label="Capital Invertido" value={formatCurrency(r.capitalInvested)} />
             </div>
 
             <div className="rounded-lg border border-border/60 bg-muted/40 p-4">
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Monthly Operating
+                Operación Mensual
               </p>
-              <ResultRow label="Property Management" value={formatCurrency(r.managementMonthly)} />
+              <ResultRow
+                label="Administración de la Propiedad"
+                value={formatCurrency(r.managementMonthly)}
+              />
               <ResultRow label="Taxes" value={formatCurrency(r.taxesMonthly)} />
-              <ResultRow label="Insurance" value={formatCurrency(r.insuranceMonthly)} />
-              <ResultRow label="Reserves" value={formatCurrency(r.reservesMonthly)} />
+              <ResultRow label="Seguro" value={formatCurrency(r.insuranceMonthly)} />
+              <ResultRow label="Reservas" value={formatCurrency(r.reservesMonthly)} />
               <div className="mt-1 border-t border-border/60 pt-1">
-                <ResultRow label="Total Operating Expenses" value={formatCurrency(r.totalOperatingExpenses)} />
-                <ResultRow label="NOI (monthly)" value={formatCurrency(r.noiMonthly)} />
-                <ResultRow label="NOI (annual)" value={formatCurrency(r.noiAnnual)} />
+                <ResultRow
+                  label="Total de Gastos Operativos"
+                  value={formatCurrency(r.totalOperatingExpenses)}
+                />
+                <ResultRow label="NOI Mensual" value={formatCurrency(r.noiMonthly)} />
+                <ResultRow label="NOI Anual" value={formatCurrency(r.noiAnnual)} />
               </div>
             </div>
 
@@ -259,8 +265,8 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
                 gastos.
               </p>
               <p>
-                El CAP rate es {formatPercent(r.capRate)} y tu retorno sobre el efectivo invertido
-                (Cash on Cash) es {formatPercent(r.cashOnCash)}.{" "}
+                El CAP Rate es {formatPercent(r.capRate)} y tu retorno sobre el efectivo invertido
+                Cash on Cash es {formatPercent(r.cashOnCash)}.{" "}
                 {cashFlowPositive
                   ? "La propiedad genera dinero cada mes."
                   : "Cuidado: la propiedad pierde dinero cada mes con estos números."}
