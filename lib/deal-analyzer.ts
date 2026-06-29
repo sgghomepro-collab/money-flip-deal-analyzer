@@ -11,6 +11,7 @@ export const STRATEGY_LABELS: Record<Strategy, string> = {
 }
 
 export type DealDecision = "HAY DINERO" | "REVISAR" | "NO HAY DINERO"
+export type DealScoreLabel = "Strong Deal" | "Review Carefully" | "Weak Deal"
 
 // ---------------------------------------------------------------------------
 // Shared property information (global across all strategies)
@@ -138,6 +139,8 @@ export interface FlipResults {
   totalCarryingCosts: number
   capitalRequired: number
   riskNotes: string[]
+  dealScore: number
+  dealScoreLabel: DealScoreLabel
   decision: DealDecision
 }
 
@@ -247,6 +250,40 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
     decision = "REVISAR"
   }
 
+  // 16. Deal Score
+  let dealScore = 50
+
+  if (decision === "HAY DINERO") dealScore += 25
+  if (decision === "REVISAR") dealScore += 5
+  if (decision === "NO HAY DINERO") dealScore -= 30
+
+  if (realRoi >= i.minRoiPercent / 100) dealScore += 15
+  if (realRoi >= i.minRoiPercent / 100 + 0.2) dealScore += 10
+  if (realRoi > 0 && realRoi < i.minRoiPercent / 100) dealScore -= 10
+  if (realRoi <= 0) dealScore -= 20
+
+  if (netProfit > minProfitRequired * 1.5) dealScore += 10
+  if (netProfit > 0 && netProfit < minProfitRequired) dealScore -= 10
+
+  if (i.actualSalePrice > 0 && i.actualSalePrice < i.arv) dealScore -= 8
+  if (i.arv > 0 && i.renovationBudget / i.arv >= 0.25) dealScore -= 8
+  if (i.arv > 0 && cashToClose / i.arv >= 0.2) dealScore -= 7
+  if (i.timelineMonths >= 6) dealScore -= 5
+  if (i.annualInterestPercent >= 13) dealScore -= 5
+  if (i.pointsPercent >= 4) dealScore -= 5
+
+  dealScore = Math.max(0, Math.min(100, Math.round(dealScore)))
+
+  let dealScoreLabel: DealScoreLabel
+
+  if (dealScore >= 80) {
+    dealScoreLabel = "Strong Deal"
+  } else if (dealScore >= 60) {
+    dealScoreLabel = "Review Carefully"
+  } else {
+    dealScoreLabel = "Weak Deal"
+  }
+
   return {
     salePriceUsed,
     basePrice,
@@ -272,6 +309,8 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
     totalCarryingCosts,
     capitalRequired,
     riskNotes,
+    dealScore,
+    dealScoreLabel,
     decision,
   }
 }
