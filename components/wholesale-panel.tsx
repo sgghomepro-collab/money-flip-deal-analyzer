@@ -63,6 +63,11 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
     setInputs((prev) => ({ ...prev, ...next }))
   }
 
+  function resetAnalysis() {
+    setInputs(WHOLESALE_DEFAULTS)
+    setSummaryCopied(false)
+  }
+
   function getDealScoreCardClass() {
     if (results.dealScoreLabel === "Strong Deal") {
       return "rounded-lg border-2 border-emerald-500 bg-emerald-100 p-5 text-emerald-950 shadow-sm"
@@ -194,9 +199,15 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
                 <CardDescription>Calculado según los campos amarillos.</CardDescription>
               </div>
 
-              <Button type="button" size="sm" onClick={copySummary} className="w-full sm:w-auto">
-                {summaryCopied ? "Copiado" : "Copiar Resumen"}
-              </Button>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Button type="button" variant="outline" size="sm" onClick={resetAnalysis}>
+                  Reiniciar Análisis
+                </Button>
+
+                <Button type="button" size="sm" onClick={copySummary}>
+                  {summaryCopied ? "Copiado" : "Copiar Resumen"}
+                </Button>
+              </div>
             </div>
           </CardHeader>
 
