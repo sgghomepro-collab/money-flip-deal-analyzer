@@ -57,6 +57,12 @@ export function formatPercent(value: number, digits = 1): string {
   return `${(value * 100).toFixed(digits)}%`
 }
 
+function getDealScoreLabel(score: number): DealScoreLabel {
+  if (score >= 80) return "Strong Deal"
+  if (score >= 60) return "Review Carefully"
+  return "Weak Deal"
+}
+
 // ---------------------------------------------------------------------------
 // Wholesaling
 // ---------------------------------------------------------------------------
@@ -72,16 +78,45 @@ export interface WholesaleResults {
   mao: number
   sellerOffer: number
   estimatedProfit: number
+  dealScore: number
+  dealScoreLabel: DealScoreLabel
 }
 
 export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
   const mao = i.arv * (1 - i.discountPercent / 100) - i.repairs
   const sellerOffer = mao - i.assignmentFee
+  const estimatedProfit = i.assignmentFee
+
+  let dealScore = 50
+
+  if (estimatedProfit >= 20000) dealScore += 25
+  else if (estimatedProfit >= 10000) dealScore += 15
+  else if (estimatedProfit >= 5000) dealScore += 5
+  else dealScore -= 15
+
+  if (i.discountPercent >= 35) dealScore += 15
+  else if (i.discountPercent >= 30) dealScore += 10
+  else if (i.discountPercent >= 25) dealScore += 5
+  else dealScore -= 10
+
+  if (i.arv > 0 && i.repairs / i.arv <= 0.15) dealScore += 10
+  else if (i.arv > 0 && i.repairs / i.arv <= 0.25) dealScore += 5
+  else dealScore -= 10
+
+  if (sellerOffer <= 0) dealScore -= 25
+  if (mao <= 0) dealScore -= 25
+  if (sellerOffer > 0 && i.arv > 0 && sellerOffer / i.arv <= 0.55) dealScore += 10
+  if (sellerOffer > 0 && i.arv > 0 && sellerOffer / i.arv >= 0.75) dealScore -= 10
+
+  dealScore = Math.max(0, Math.min(100, Math.round(dealScore)))
+  const dealScoreLabel = getDealScoreLabel(dealScore)
 
   return {
     mao,
     sellerOffer,
-    estimatedProfit: i.assignmentFee,
+    estimatedProfit,
+    dealScore,
+    dealScoreLabel,
   }
 }
 
@@ -273,16 +308,7 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
   if (i.pointsPercent >= 4) dealScore -= 5
 
   dealScore = Math.max(0, Math.min(100, Math.round(dealScore)))
-
-  let dealScoreLabel: DealScoreLabel
-
-  if (dealScore >= 80) {
-    dealScoreLabel = "Strong Deal"
-  } else if (dealScore >= 60) {
-    dealScoreLabel = "Review Carefully"
-  } else {
-    dealScoreLabel = "Weak Deal"
-  }
+  const dealScoreLabel = getDealScoreLabel(dealScore)
 
   return {
     salePriceUsed,
