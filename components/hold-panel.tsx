@@ -24,6 +24,11 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
     setInputs((prev) => ({ ...prev, ...next }))
   }
 
+  function resetAnalysis() {
+    setInputs(HOLD_DEFAULTS)
+    setSummaryCopied(false)
+  }
+
   async function copySummary() {
     const propertyAddress = formatProperty(property, "Propiedad no ingresada")
 
@@ -195,9 +200,15 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
                 <CardDescription>Calculado según los campos amarillos.</CardDescription>
               </div>
 
-              <Button type="button" size="sm" onClick={copySummary} className="w-full sm:w-auto">
-                {summaryCopied ? "Copiado" : "Copiar Resumen"}
-              </Button>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Button type="button" variant="outline" size="sm" onClick={resetAnalysis}>
+                  Reiniciar Análisis
+                </Button>
+
+                <Button type="button" size="sm" onClick={copySummary}>
+                  {summaryCopied ? "Copiado" : "Copiar Resumen"}
+                </Button>
+              </div>
             </div>
           </CardHeader>
 
@@ -232,7 +243,10 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
               </p>
               <ResultRow label="Down Payment" value={formatCurrency(r.downPayment)} />
               <ResultRow label="Monto del Préstamo" value={formatCurrency(r.loanAmount)} />
-              <ResultRow label="Pago Mensual Principal e Interés" value={formatCurrency(r.monthlyPI)} />
+              <ResultRow
+                label="Pago Mensual Principal e Interés"
+                value={formatCurrency(r.monthlyPI)}
+              />
               <ResultRow label="Costos de Cierre" value={formatCurrency(r.closingCosts)} />
               <ResultRow label="Capital Invertido" value={formatCurrency(r.capitalInvested)} />
             </div>
