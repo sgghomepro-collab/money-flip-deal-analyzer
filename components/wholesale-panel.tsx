@@ -6,6 +6,7 @@ import {
   formatCurrency,
   formatProperty,
   WHOLESALE_DEFAULTS,
+  type DealScoreLabel,
   type PropertyInfo,
   type WholesaleInputs,
 } from "@/lib/deal-analyzer"
@@ -15,10 +16,48 @@ import { NumberField, ResultCard, YellowNotice } from "@/components/deal-fields"
 import { CoachNotes, OfferEmail } from "@/components/deal-shared"
 import { ArvCompsAnalyzer } from "@/components/arv-comps-analyzer"
 
+const DEAL_SCORE_LABELS_ES: Record<DealScoreLabel, string> = {
+  "Strong Deal": "Trato Fuerte",
+  "Review Carefully": "Revisar con Cuidado",
+  "Weak Deal": "Trato Débil",
+}
+
+function translateRiskNote(note: string) {
+  const translations: Record<string, string> = {
+    "Discount is below 30%. The backend may be tight for the fix & flipper. Review comps, repairs, and resale margin carefully.":
+      "El descuento está por debajo del 30%. El margen final puede quedar muy apretado para el fix & flipper. Revisa comparables, reparaciones y margen de reventa con cuidado.",
+    "Discount is below 25%. This is usually too risky for wholesaling because the fix & flipper may not have enough backend profit.":
+      "El descuento está por debajo del 25%. Normalmente esto es demasiado riesgoso para wholesaling porque el fix & flipper puede quedarse sin suficiente ganancia al final.",
+    "Repair estimate is high compared to ARV. Verify repair numbers before locking the contract.":
+      "El estimado de reparaciones es alto comparado con el ARV. Verifica los números de reparación antes de firmar el contrato.",
+    "Seller offer is high compared to ARV. This may leave limited room for the end buyer.":
+      "La oferta al vendedor está alta comparada con el ARV. Esto puede dejar poco margen para el comprador final.",
+    "Assignment fee is zero or negative. There is no wholesale profit in this scenario.":
+      "El assignment fee es cero o negativo. En este escenario no hay ganancia de wholesale.",
+    "Assignment fee is low. Make sure the deal is worth your time and marketing effort.":
+      "El assignment fee es bajo. Asegúrate de que el trato valga tu tiempo y esfuerzo de mercadeo.",
+    "Assignment fee is high compared to MAO. Make sure your seller offer is low enough and the contract is still sellable.":
+      "El assignment fee está alto comparado con el MAO. Asegúrate de que la oferta al vendedor sea lo suficientemente baja y que el contrato todavía se pueda vender.",
+    "Assignment fee is getting high compared to MAO. Protect the fix & flipper's backend before increasing your fee.":
+      "El assignment fee está subiendo demasiado comparado con el MAO. Protege el margen del fix & flipper antes de aumentar tu fee.",
+    "Seller offer is zero or negative. Review ARV, repairs, discount, and assignment fee.":
+      "La oferta al vendedor es cero o negativa. Revisa el ARV, las reparaciones, el descuento y el assignment fee.",
+    "MAO is zero or negative. This deal does not support the current repair and discount assumptions.":
+      "El MAO es cero o negativo. Este trato no soporta las reparaciones y el descuento que estás usando.",
+    "ARV is missing or invalid. Add a realistic ARV before trusting the analysis.":
+      "El ARV está vacío o no es válido. Agrega un ARV realista antes de confiar en el análisis.",
+    "No major wholesaling risk flags detected. Still verify comps, repair estimate, seller motivation, and buyer demand before moving forward.":
+      "No se detectaron alertas mayores de wholesaling. Aun así, verifica comparables, estimado de reparaciones, motivación del vendedor y demanda de compradores antes de avanzar.",
+  }
+
+  return translations[note] ?? note
+}
+
 export function WholesalePanel({ property }: { property: PropertyInfo }) {
   const [inputs, setInputs] = useState<WholesaleInputs>(WHOLESALE_DEFAULTS)
   const [summaryCopied, setSummaryCopied] = useState(false)
   const results = useMemo(() => analyzeWholesale(inputs), [inputs])
+  const translatedRiskNotes = results.riskNotes.map(translateRiskNote)
 
   function set(next: Partial<WholesaleInputs>) {
     setInputs((prev) => ({ ...prev, ...next }))
@@ -61,26 +100,26 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
   }
 
   async function copySummary() {
-    const propertyAddress = formatProperty(property, "Property not entered")
+    const propertyAddress = formatProperty(property, "Propiedad no ingresada")
 
     const summary = [
-      "Money Flip - Wholesaling Summary",
+      "Money Flip - Resumen de Wholesaling",
       "",
-      `Property: ${propertyAddress}`,
-      `Strategy: Wholesaling`,
-      `Deal Score: ${results.dealScore}/100 - ${results.dealScoreLabel}`,
+      `Propiedad: ${propertyAddress}`,
+      "Estrategia: Wholesaling",
+      `Deal Score: ${results.dealScore}/100 - ${DEAL_SCORE_LABELS_ES[results.dealScoreLabel]}`,
       "",
       `ARV: ${formatCurrency(inputs.arv)}`,
-      `Repair Estimate: ${formatCurrency(inputs.repairs)}`,
-      `Discount Percent: ${inputs.discountPercent}%`,
+      `Estimado de Reparaciones: ${formatCurrency(inputs.repairs)}`,
+      `Descuento: ${inputs.discountPercent}%`,
       `Assignment Fee: ${formatCurrency(inputs.assignmentFee)}`,
       "",
       `MAO: ${formatCurrency(results.mao)}`,
-      `Seller Offer: ${formatCurrency(results.sellerOffer)}`,
-      `Estimated Profit: ${formatCurrency(results.estimatedProfit)}`,
+      `Oferta al Vendedor: ${formatCurrency(results.sellerOffer)}`,
+      `Ganancia Estimada: ${formatCurrency(results.estimatedProfit)}`,
       "",
-      "Risk Notes:",
-      ...results.riskNotes.map((note) => `- ${note}`),
+      "Alertas del Análisis:",
+      ...translatedRiskNotes.map((note) => `- ${note}`),
     ].join("\n")
 
     await navigator.clipboard.writeText(summary)
@@ -97,8 +136,8 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
       <div className="flex flex-col gap-6">
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle className="text-lg">Property Inputs</CardTitle>
-            <CardDescription>Only change the yellow fields.</CardDescription>
+            <CardTitle className="text-lg">Datos del Trato</CardTitle>
+            <CardDescription>Solo cambia los campos amarillos.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-5">
             <YellowNotice />
@@ -106,14 +145,15 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumberField
                 id="w-arv"
-                label="ARV (After Repair Value)"
+                label="ARV"
                 prefix="$"
                 value={inputs.arv}
                 onValueChange={(v) => set({ arv: v })}
+                hint="Valor estimado después de reparaciones."
               />
               <NumberField
                 id="w-repairs"
-                label="Repair Estimate"
+                label="Estimado de Reparaciones"
                 prefix="$"
                 value={inputs.repairs}
                 onValueChange={(v) => set({ repairs: v })}
@@ -123,10 +163,11 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumberField
                 id="w-discount"
-                label="Discount Percent"
+                label="Porcentaje de Descuento"
                 suffix="%"
                 value={inputs.discountPercent}
                 onValueChange={(v) => set({ discountPercent: v })}
+                hint="Regla recomendada: no bajar del 30%."
               />
               <NumberField
                 id="w-fee"
@@ -134,6 +175,7 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
                 prefix="$"
                 value={inputs.assignmentFee}
                 onValueChange={(v) => set({ assignmentFee: v })}
+                hint="Tu ganancia como wholesaler."
               />
             </div>
           </CardContent>
@@ -148,12 +190,12 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle className="text-lg">Deal Analysis</CardTitle>
-                <CardDescription>Calculated from your yellow fields.</CardDescription>
+                <CardTitle className="text-lg">Análisis del Trato</CardTitle>
+                <CardDescription>Calculado según los campos amarillos.</CardDescription>
               </div>
 
               <Button type="button" size="sm" onClick={copySummary} className="w-full sm:w-auto">
-                {summaryCopied ? "Copied!" : "Copy Deal Summary"}
+                {summaryCopied ? "Copiado" : "Copiar Resumen"}
               </Button>
             </div>
           </CardHeader>
@@ -170,7 +212,9 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
                   </p>
                 </div>
 
-                <div className={getDealScoreBadgeClass()}>{results.dealScoreLabel}</div>
+                <div className={getDealScoreBadgeClass()}>
+                  {DEAL_SCORE_LABELS_ES[results.dealScoreLabel]}
+                </div>
               </div>
 
               <div className="mt-4 h-3 overflow-hidden rounded-full bg-background">
@@ -185,26 +229,28 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
               <ResultCard
                 label="MAO"
                 value={formatCurrency(results.mao)}
-                hint="Max Allowable Offer"
+                hint="Oferta máxima permitida antes de restar tu assignment fee."
               />
               <ResultCard
-                label="Seller Offer"
+                label="Oferta al Vendedor"
                 value={formatCurrency(results.sellerOffer)}
-                hint="What you offer the seller"
+                hint="Lo que ofrecerías al vendedor."
                 emphasis="primary"
               />
             </div>
             <ResultCard
-              label="Estimated Profit"
+              label="Ganancia Estimada"
               value={formatCurrency(results.estimatedProfit)}
-              hint="Your assignment fee"
+              hint="Tu assignment fee."
             />
 
             <div className="rounded-lg border-2 border-amber-500 bg-amber-200 p-4 text-amber-950 shadow-sm">
-              <p className="mb-3 text-xs font-bold uppercase tracking-wide">Risk Notes</p>
+              <p className="mb-3 text-xs font-bold uppercase tracking-wide">
+                Alertas del Análisis
+              </p>
 
               <ul className="flex list-disc flex-col gap-2 pl-5 text-sm font-medium">
-                {results.riskNotes.map((note) => (
+                {translatedRiskNotes.map((note) => (
                   <li key={note}>{note}</li>
                 ))}
               </ul>
@@ -212,18 +258,24 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
 
             <CoachNotes>
               <p>
-                Tu MAO es {formatCurrency(results.mao)}. Ese es el máximo que pagarías por la casa
-                usando el {inputs.discountPercent}% de descuento sobre el ARV menos las reparaciones.
+                Tu MAO es {formatCurrency(results.mao)}. Ese es el máximo permitido antes de
+                descontar tu assignment fee, usando el {inputs.discountPercent}% de descuento sobre
+                el ARV menos las reparaciones.
               </p>
               <p>
-                Le ofreces al vendedor {formatCurrency(results.sellerOffer)} (el MAO menos tu fee de{" "}
-                {formatCurrency(inputs.assignmentFee)}). Tu ganancia es el fee:{" "}
-                {formatCurrency(results.estimatedProfit)}.
+                Tu oferta al vendedor sería {formatCurrency(results.sellerOffer)}. Esa oferta sale
+                de tomar el MAO y restarle tu assignment fee de {formatCurrency(inputs.assignmentFee)}.
               </p>
               <p>
-                El Deal Score actual es {results.dealScore}/100 ({results.dealScoreLabel}). Úsalo
-                como una guía rápida, pero siempre confirma comps, reparaciones y motivación del
-                vendedor antes de avanzar.
+                Tu ganancia estimada es {formatCurrency(results.estimatedProfit)}. Recuerda: si subes
+                demasiado tu assignment fee, debes bajar la oferta al vendedor para proteger el margen
+                del fix & flipper.
+              </p>
+              <p>
+                El Deal Score actual es {results.dealScore}/100 (
+                {DEAL_SCORE_LABELS_ES[results.dealScoreLabel]}). Úsalo como una guía rápida, pero
+                siempre confirma comparables, reparaciones, motivación del vendedor y demanda de
+                compradores antes de avanzar.
               </p>
             </CoachNotes>
           </CardContent>
