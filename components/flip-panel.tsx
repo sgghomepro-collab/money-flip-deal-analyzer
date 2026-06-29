@@ -10,6 +10,7 @@ import {
   type FlipInputs,
   type PropertyInfo,
 } from "@/lib/deal-analyzer"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { NumberField, ResultCard, ResultRow, YellowNotice } from "@/components/deal-fields"
 import { CoachNotes, DecisionBanner, OfferEmail } from "@/components/deal-shared"
@@ -17,6 +18,7 @@ import { ArvCompsAnalyzer } from "@/components/arv-comps-analyzer"
 
 export function FlipPanel({ property }: { property: PropertyInfo }) {
   const [inputs, setInputs] = useState<FlipInputs>(FLIP_DEFAULTS)
+  const [summaryCopied, setSummaryCopied] = useState(false)
   const [annualInterestText, setAnnualInterestText] = useState(
     String(FLIP_DEFAULTS.annualInterestPercent ?? 0),
   )
@@ -50,6 +52,41 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
 
     setAnnualInterestText(String(finalValue))
     set({ annualInterestPercent: finalValue })
+  }
+
+  async function copySummary() {
+    const propertyAddress = formatProperty(property, "Property not entered")
+
+    const summary = [
+      "Money Flip - Fix & Flip Summary",
+      "",
+      `Property: ${propertyAddress}`,
+      `Decision: ${r.decision}`,
+      "",
+      `ARV: ${formatCurrency(inputs.arv)}`,
+      `Actual Sale Price: ${formatCurrency(inputs.actualSalePrice)}`,
+      `Sale Price Used: ${formatCurrency(r.salePriceUsed)}`,
+      `Renovation Budget: ${formatCurrency(inputs.renovationBudget)}`,
+      "",
+      `Net Offer / MAO: ${formatCurrency(r.netOffer)}`,
+      `Cash Needed to Close: ${formatCurrency(r.cashToClose)}`,
+      `Capital Required: ${formatCurrency(r.capitalRequired)}`,
+      "",
+      `Cash Back: ${formatCurrency(r.cashBack)}`,
+      `Net Profit: ${formatCurrency(r.netProfit)}`,
+      `Real ROI: ${formatPercent(r.realRoi, 2)}`,
+      `Minimum Profit Required: ${formatCurrency(r.minProfitRequired)}`,
+      "",
+      `HML Down Payment: ${inputs.downPaymentPercent}%`,
+      `HML Points: ${inputs.pointsPercent}%`,
+      `HML Annual Interest Rate: ${inputs.annualInterestPercent}%`,
+      `Project Timeline: ${inputs.timelineMonths} months`,
+    ].join("\n")
+
+    await navigator.clipboard.writeText(summary)
+
+    setSummaryCopied(true)
+    window.setTimeout(() => setSummaryCopied(false), 2000)
   }
 
   return (
@@ -224,10 +261,18 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
 
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle className="text-lg">Deal Analysis</CardTitle>
-            <CardDescription>
-              Calculated from your yellow fields. Actual Sale Price is used when entered.
-            </CardDescription>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle className="text-lg">Deal Analysis</CardTitle>
+                <CardDescription>
+                  Calculated from your yellow fields. Actual Sale Price is used when entered.
+                </CardDescription>
+              </div>
+
+              <Button type="button" variant="outline" size="sm" onClick={copySummary}>
+                {summaryCopied ? "Copied!" : "Copy Summary"}
+              </Button>
+            </div>
           </CardHeader>
 
           <CardContent className="flex flex-col gap-4">
