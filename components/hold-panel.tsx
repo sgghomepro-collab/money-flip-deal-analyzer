@@ -10,16 +10,63 @@ import {
   type HoldInputs,
   type PropertyInfo,
 } from "@/lib/deal-analyzer"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { NumberField, ResultCard, ResultRow, YellowNotice } from "@/components/deal-fields"
 import { CoachNotes, OfferEmail } from "@/components/deal-shared"
 
 export function HoldPanel({ property }: { property: PropertyInfo }) {
   const [inputs, setInputs] = useState<HoldInputs>(HOLD_DEFAULTS)
+  const [summaryCopied, setSummaryCopied] = useState(false)
   const r = useMemo(() => analyzeHold(inputs), [inputs])
 
   function set(next: Partial<HoldInputs>) {
     setInputs((prev) => ({ ...prev, ...next }))
+  }
+
+  async function copySummary() {
+    const propertyAddress = formatProperty(property, "Property not entered")
+
+    const summary = [
+      "Money Flip - Buy & Hold Summary",
+      "",
+      `Property: ${propertyAddress}`,
+      `Strategy: Buy & Hold`,
+      "",
+      `Purchase Price: ${formatCurrency(inputs.purchasePrice)}`,
+      `Down Payment: ${inputs.downPaymentPercent}%`,
+      `Interest Rate: ${inputs.interestRatePercent}%`,
+      `Loan Term: ${inputs.loanTermYears} years`,
+      `Closing Costs: ${inputs.closingPercent}%`,
+      `Additional Costs: ${formatCurrency(inputs.additionalCosts)}`,
+      "",
+      `Monthly Rent: ${formatCurrency(inputs.monthlyRent)}`,
+      `Property Management: ${inputs.managementPercent}%`,
+      `Taxes Annual: ${inputs.taxesPercent}%`,
+      `Insurance Annual: ${inputs.insurancePercent}%`,
+      `Reserves: ${inputs.reservesPercent}%`,
+      `HOA Monthly: ${formatCurrency(inputs.hoaMonthly)}`,
+      "",
+      `Monthly Cash Flow: ${formatCurrency(r.cashFlowMonthly)}`,
+      `Annual Cash Flow: ${formatCurrency(r.cashFlowAnnual)}`,
+      `CAP Rate: ${formatPercent(r.capRate)}`,
+      `Cash on Cash: ${formatPercent(r.cashOnCash)}`,
+      "",
+      `Down Payment Amount: ${formatCurrency(r.downPayment)}`,
+      `Loan Amount: ${formatCurrency(r.loanAmount)}`,
+      `Monthly Principal & Interest: ${formatCurrency(r.monthlyPI)}`,
+      `Closing Costs Amount: ${formatCurrency(r.closingCosts)}`,
+      `Capital Invested: ${formatCurrency(r.capitalInvested)}`,
+      "",
+      `Total Operating Expenses: ${formatCurrency(r.totalOperatingExpenses)}`,
+      `NOI Monthly: ${formatCurrency(r.noiMonthly)}`,
+      `NOI Annual: ${formatCurrency(r.noiAnnual)}`,
+    ].join("\n")
+
+    await navigator.clipboard.writeText(summary)
+
+    setSummaryCopied(true)
+    window.setTimeout(() => setSummaryCopied(false), 2000)
   }
 
   const cashFlowPositive = r.cashFlowMonthly >= 0
@@ -142,9 +189,18 @@ export function HoldPanel({ property }: { property: PropertyInfo }) {
       <div className="flex flex-col gap-6">
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle className="text-lg">Deal Analysis</CardTitle>
-            <CardDescription>Calculated from your yellow fields.</CardDescription>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle className="text-lg">Deal Analysis</CardTitle>
+                <CardDescription>Calculated from your yellow fields.</CardDescription>
+              </div>
+
+              <Button type="button" size="sm" onClick={copySummary} className="w-full sm:w-auto">
+                {summaryCopied ? "Copied!" : "Copy Deal Summary"}
+              </Button>
+            </div>
           </CardHeader>
+
           <CardContent className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <ResultCard
