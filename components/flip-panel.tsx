@@ -328,12 +328,12 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
               />
             </div>
 
-            <div className="rounded-lg border border-yellow-400/50 bg-yellow-50 p-4 text-yellow-950">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide">
+            <div className="rounded-lg border-2 border-amber-500 bg-amber-200 p-4 text-amber-950 shadow-sm">
+              <p className="mb-3 text-xs font-bold uppercase tracking-wide">
                 Risk Notes
               </p>
 
-              <ul className="flex list-disc flex-col gap-2 pl-5 text-sm">
+              <ul className="flex list-disc flex-col gap-2 pl-5 text-sm font-medium">
                 {r.riskNotes.map((note) => (
                   <li key={note}>{note}</li>
                 ))}
