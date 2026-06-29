@@ -9,6 +9,7 @@ import {
   type PropertyInfo,
   type WholesaleInputs,
 } from "@/lib/deal-analyzer"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { NumberField, ResultCard, YellowNotice } from "@/components/deal-fields"
 import { CoachNotes, OfferEmail } from "@/components/deal-shared"
@@ -16,10 +17,36 @@ import { ArvCompsAnalyzer } from "@/components/arv-comps-analyzer"
 
 export function WholesalePanel({ property }: { property: PropertyInfo }) {
   const [inputs, setInputs] = useState<WholesaleInputs>(WHOLESALE_DEFAULTS)
+  const [summaryCopied, setSummaryCopied] = useState(false)
   const results = useMemo(() => analyzeWholesale(inputs), [inputs])
 
   function set(next: Partial<WholesaleInputs>) {
     setInputs((prev) => ({ ...prev, ...next }))
+  }
+
+  async function copySummary() {
+    const propertyAddress = formatProperty(property, "Property not entered")
+
+    const summary = [
+      "Money Flip - Wholesaling Summary",
+      "",
+      `Property: ${propertyAddress}`,
+      `Strategy: Wholesaling`,
+      "",
+      `ARV: ${formatCurrency(inputs.arv)}`,
+      `Repair Estimate: ${formatCurrency(inputs.repairs)}`,
+      `Discount Percent: ${inputs.discountPercent}%`,
+      `Assignment Fee: ${formatCurrency(inputs.assignmentFee)}`,
+      "",
+      `MAO: ${formatCurrency(results.mao)}`,
+      `Seller Offer: ${formatCurrency(results.sellerOffer)}`,
+      `Estimated Profit: ${formatCurrency(results.estimatedProfit)}`,
+    ].join("\n")
+
+    await navigator.clipboard.writeText(summary)
+
+    setSummaryCopied(true)
+    window.setTimeout(() => setSummaryCopied(false), 2000)
   }
 
   const propertyLabel = formatProperty(property, "")
@@ -79,9 +106,18 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
       <div className="flex flex-col gap-6">
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle className="text-lg">Deal Analysis</CardTitle>
-            <CardDescription>Calculated from your yellow fields.</CardDescription>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle className="text-lg">Deal Analysis</CardTitle>
+                <CardDescription>Calculated from your yellow fields.</CardDescription>
+              </div>
+
+              <Button type="button" size="sm" onClick={copySummary} className="w-full sm:w-auto">
+                {summaryCopied ? "Copied!" : "Copy Deal Summary"}
+              </Button>
+            </div>
           </CardHeader>
+
           <CardContent className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <ResultCard
