@@ -269,8 +269,8 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 </CardDescription>
               </div>
 
-              <Button type="button" variant="outline" size="sm" onClick={copySummary}>
-                {summaryCopied ? "Copied!" : "Copy Summary"}
+              <Button type="button" size="sm" onClick={copySummary} className="w-full sm:w-auto">
+                {summaryCopied ? "Copied!" : "Copy Deal Summary"}
               </Button>
             </div>
           </CardHeader>
