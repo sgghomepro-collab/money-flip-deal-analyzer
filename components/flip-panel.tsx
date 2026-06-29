@@ -81,6 +81,9 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
       `HML Points: ${inputs.pointsPercent}%`,
       `HML Annual Interest Rate: ${inputs.annualInterestPercent}%`,
       `Project Timeline: ${inputs.timelineMonths} months`,
+      "",
+      "Risk Notes:",
+      ...r.riskNotes.map((note) => `- ${note}`),
     ].join("\n")
 
     await navigator.clipboard.writeText(summary)
@@ -323,6 +326,18 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
                 value={formatCurrency(r.minProfitRequired)}
                 hint={`At ${inputs.minRoiPercent}% minimum ROI`}
               />
+            </div>
+
+            <div className="rounded-lg border border-yellow-400/50 bg-yellow-50 p-4 text-yellow-950">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide">
+                Risk Notes
+              </p>
+
+              <ul className="flex list-disc flex-col gap-2 pl-5 text-sm">
+                {r.riskNotes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
             </div>
 
             <div className="rounded-lg border border-border/60 bg-muted/40 p-4">
