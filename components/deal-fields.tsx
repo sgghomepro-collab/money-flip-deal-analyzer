@@ -90,48 +90,100 @@ export function NumberField({
   suffix,
   allowDecimal,
 }: NumberFieldProps) {
-  // For currency-style fields we display thousands separators.
   const isCurrency = prefix === "$"
+  const normalizedLabel = label.toLowerCase()
 
-  // Decimal fields keep their own raw text state so students can type
-  // intermediate values like "1." or "0.3" without them being stripped.
-  const [decimalText, setDecimalText] = useState(() =>
-    value === 0 ? "" : String(value),
-  )
+  const shouldAllowDecimal =
+    allowDecimal === true ||
+    suffix === "%" ||
+    normalizedLabel.includes("bath") ||
+    normalizedLabel.includes("baths")
 
-  // Keep local text in sync if the value changes from outside (e.g. reset),
-  // but don't clobber an in-progress entry like "1." that parses to the same number.
-  useEffect(() => {
-    if (!allowDecimal) return
-    if (Number(decimalText) !== value) {
-      setDecimalText(value === 0 ? "" : String(value))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, allowDecimal])
-
-  const display = (() => {
-    if (allowDecimal) return decimalText
+  const [rawText, setRawText] = useState(() => {
     if (value === 0) return ""
-    if (isCurrency) return value.toLocaleString("en-US")
+    if (isCurrency && !shouldAllowDecimal) return value.toLocaleString("en-US")
     return String(value)
-  })()
+  })
 
-  function handleChange(raw: string) {
-    if (allowDecimal) {
-      // Allow digits and a single decimal point.
-      let cleaned = raw.replace(/[^\d.]/g, "")
-      const firstDot = cleaned.indexOf(".")
-      if (firstDot !== -1) {
-        cleaned =
-          cleaned.slice(0, firstDot + 1) +
-          cleaned.slice(firstDot + 1).replace(/\./g, "")
-      }
-      setDecimalText(cleaned)
-      onValueChange(cleaned === "" || cleaned === "." ? 0 : Number(cleaned))
+  useEffect(() => {
+    const numericText = rawText.replace(/,/g, "")
+    const currentNumber = numericText === "" || numericText === "." ? 0 : Number(numericText)
+
+    if (Number.isFinite(currentNumber) && currentNumber === value) return
+
+    if (value === 0) {
+      setRawText("")
       return
     }
-    const cleaned = raw.replace(/[^\d]/g, "")
-    onValueChange(cleaned ? Number(cleaned) : 0)
+
+    if (isCurrency && !shouldAllowDecimal) {
+      setRawText(value.toLocaleString("en-US"))
+      return
+    }
+
+    setRawText(String(value))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, isCurrency, shouldAllowDecimal])
+
+  function cleanDecimalInput(raw: string) {
+    let cleaned = raw.replace(",", ".").replace(/[^\d.]/g, "")
+
+    const firstDot = cleaned.indexOf(".")
+    if (firstDot !== -1) {
+      cleaned =
+        cleaned.slice(0, firstDot + 1) +
+        cleaned.slice(firstDot + 1).replace(/\./g, "")
+    }
+
+    return cleaned
+  }
+
+  function cleanWholeNumberInput(raw: string) {
+    return raw.replace(/[^\d]/g, "")
+  }
+
+  function handleChange(raw: string) {
+    if (shouldAllowDecimal) {
+      const cleaned = cleanDecimalInput(raw)
+
+      setRawText(cleaned)
+
+      if (cleaned === "" || cleaned === ".") {
+        onValueChange(0)
+        return
+      }
+
+      const parsedValue = Number.parseFloat(cleaned)
+      onValueChange(Number.isFinite(parsedValue) ? parsedValue : 0)
+      return
+    }
+
+    const cleaned = cleanWholeNumberInput(raw)
+    const parsedValue = cleaned ? Number(cleaned) : 0
+
+    setRawText(isCurrency && cleaned ? parsedValue.toLocaleString("en-US") : cleaned)
+    onValueChange(parsedValue)
+  }
+
+  function handleBlur() {
+    if (!shouldAllowDecimal) return
+
+    if (rawText.trim() === "" || rawText === ".") {
+      setRawText("")
+      onValueChange(0)
+      return
+    }
+
+    const parsedValue = Number.parseFloat(rawText)
+
+    if (!Number.isFinite(parsedValue)) {
+      setRawText("")
+      onValueChange(0)
+      return
+    }
+
+    setRawText(String(parsedValue))
+    onValueChange(parsedValue)
   }
 
   return (
@@ -142,16 +194,18 @@ export function NumberField({
             {prefix}
           </span>
         ) : null}
+
         <Input
           id={id}
-          type={allowDecimal ? "number" : "text"}
-          step={allowDecimal ? "0.01" : undefined}
-          inputMode={allowDecimal ? "decimal" : "numeric"}
-          value={display}
+          type="text"
+          inputMode={shouldAllowDecimal ? "decimal" : "numeric"}
+          value={rawText}
           placeholder={placeholder}
           className={cn(yellowFieldClass, prefix && "pl-7", suffix && "pr-9")}
           onChange={(e) => handleChange(e.target.value)}
+          onBlur={handleBlur}
         />
+
         {suffix ? (
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-editable-foreground/70">
             {suffix}
