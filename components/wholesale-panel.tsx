@@ -78,6 +78,9 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
       `MAO: ${formatCurrency(results.mao)}`,
       `Seller Offer: ${formatCurrency(results.sellerOffer)}`,
       `Estimated Profit: ${formatCurrency(results.estimatedProfit)}`,
+      "",
+      "Risk Notes:",
+      ...results.riskNotes.map((note) => `- ${note}`),
     ].join("\n")
 
     await navigator.clipboard.writeText(summary)
@@ -196,6 +199,16 @@ export function WholesalePanel({ property }: { property: PropertyInfo }) {
               value={formatCurrency(results.estimatedProfit)}
               hint="Your assignment fee"
             />
+
+            <div className="rounded-lg border-2 border-amber-500 bg-amber-200 p-4 text-amber-950 shadow-sm">
+              <p className="mb-3 text-xs font-bold uppercase tracking-wide">Risk Notes</p>
+
+              <ul className="flex list-disc flex-col gap-2 pl-5 text-sm font-medium">
+                {results.riskNotes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </div>
 
             <CoachNotes>
               <p>
