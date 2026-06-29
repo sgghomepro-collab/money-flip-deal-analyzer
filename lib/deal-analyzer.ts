@@ -80,6 +80,7 @@ export interface WholesaleResults {
   estimatedProfit: number
   dealScore: number
   dealScoreLabel: DealScoreLabel
+  riskNotes: string[]
 }
 
 export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
@@ -92,6 +93,7 @@ export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
   const assignmentFeeRatio = mao > 0 ? i.assignmentFee / mao : 0
 
   let dealScore = 50
+  const riskNotes: string[] = []
 
   // 1. Discount protection rule.
   // Wholesaling must protect the backend for the fix & flipper.
@@ -102,8 +104,14 @@ export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
     dealScore += 18
   } else if (i.discountPercent >= 25) {
     dealScore -= 5
+    riskNotes.push(
+      "Discount is below 30%. The backend may be tight for the fix & flipper. Review comps, repairs, and resale margin carefully.",
+    )
   } else {
     dealScore -= 25
+    riskNotes.push(
+      "Discount is below 25%. This is usually too risky for wholesaling because the fix & flipper may not have enough backend profit.",
+    )
   }
 
   // 2. Repair risk.
@@ -113,6 +121,9 @@ export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
     dealScore += 5
   } else if (repairRatio > 0.25) {
     dealScore -= 12
+    riskNotes.push(
+      "Repair estimate is high compared to ARV. Verify repair numbers before locking the contract.",
+    )
   }
 
   // 3. Seller offer position versus ARV.
@@ -125,14 +136,19 @@ export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
     dealScore += 2
   } else if (sellerOffer > 0 && sellerOfferRatio > 0.7) {
     dealScore -= 15
+    riskNotes.push(
+      "Seller offer is high compared to ARV. This may leave limited room for the end buyer.",
+    )
   }
 
   // 4. Assignment fee should not automatically make the deal stronger.
   // A higher fee can be good only if the backend still works and the seller offer is realistic.
   if (estimatedProfit <= 0) {
     dealScore -= 30
+    riskNotes.push("Assignment fee is zero or negative. There is no wholesale profit in this scenario.")
   } else if (estimatedProfit < 5000) {
     dealScore -= 10
+    riskNotes.push("Assignment fee is low. Make sure the deal is worth your time and marketing effort.")
   } else if (estimatedProfit >= 5000 && estimatedProfit <= 15000) {
     dealScore += 5
   }
@@ -140,14 +156,31 @@ export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
   // 5. Assignment fee too high compared to MAO can make the contract harder to sell.
   if (assignmentFeeRatio > 0.25) {
     dealScore -= 15
+    riskNotes.push(
+      "Assignment fee is high compared to MAO. Make sure your seller offer is low enough and the contract is still sellable.",
+    )
   } else if (assignmentFeeRatio > 0.2) {
     dealScore -= 8
+    riskNotes.push(
+      "Assignment fee is getting high compared to MAO. Protect the fix & flipper's backend before increasing your fee.",
+    )
   }
 
   // 6. Invalid or dangerous numbers.
-  if (sellerOffer <= 0) dealScore -= 30
-  if (mao <= 0) dealScore -= 30
-  if (i.arv <= 0) dealScore -= 30
+  if (sellerOffer <= 0) {
+    dealScore -= 30
+    riskNotes.push("Seller offer is zero or negative. Review ARV, repairs, discount, and assignment fee.")
+  }
+
+  if (mao <= 0) {
+    dealScore -= 30
+    riskNotes.push("MAO is zero or negative. This deal does not support the current repair and discount assumptions.")
+  }
+
+  if (i.arv <= 0) {
+    dealScore -= 30
+    riskNotes.push("ARV is missing or invalid. Add a realistic ARV before trusting the analysis.")
+  }
 
   // 7. Hard caps based on discount rule.
   // Less than 30% should never be Strong.
@@ -163,12 +196,19 @@ export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
   dealScore = Math.max(0, Math.min(100, Math.round(dealScore)))
   const dealScoreLabel = getDealScoreLabel(dealScore)
 
+  if (riskNotes.length === 0) {
+    riskNotes.push(
+      "No major wholesaling risk flags detected. Still verify comps, repair estimate, seller motivation, and buyer demand before moving forward.",
+    )
+  }
+
   return {
     mao,
     sellerOffer,
     estimatedProfit,
     dealScore,
     dealScoreLabel,
+    riskNotes,
   }
 }
 
