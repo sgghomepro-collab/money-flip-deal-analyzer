@@ -22,7 +22,6 @@ import { Check, Copy, MapPin, Mail } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   buildOfferEmail,
-  EMAIL_TONE_LABELS,
   formatCurrency,
   type DealDecision,
   type EmailTone,
@@ -31,7 +30,7 @@ import {
 import { NumberField, TextField, YellowNotice } from "@/components/deal-fields"
 
 // ---------------------------------------------------------------------------
-// Shared Property Information card (global across all strategies)
+// Información de la propiedad
 // ---------------------------------------------------------------------------
 
 export function PropertyInfoCard({
@@ -46,10 +45,10 @@ export function PropertyInfoCard({
       <CardHeader>
         <div className="flex items-center gap-2">
           <MapPin className="size-5 text-muted-foreground" />
-          <CardTitle className="text-lg">Property Information</CardTitle>
+          <CardTitle className="text-lg">Información de la Propiedad</CardTitle>
         </div>
         <CardDescription>
-          Applies to every strategy below. Only change the yellow fields.
+          Esta información aplica a todas las estrategias. Solo cambia los campos amarillos.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
@@ -57,7 +56,7 @@ export function PropertyInfoCard({
 
         <TextField
           id="prop-address"
-          label="Property Address"
+          label="Dirección de la Propiedad"
           value={value.address}
           onValueChange={(v) => onChange({ address: v })}
           placeholder="123 Main St"
@@ -67,7 +66,7 @@ export function PropertyInfoCard({
           <div className="sm:col-span-3">
             <TextField
               id="prop-city"
-              label="City"
+              label="Ciudad"
               value={value.city}
               onValueChange={(v) => onChange({ city: v })}
               placeholder="Austin"
@@ -76,7 +75,7 @@ export function PropertyInfoCard({
           <div className="sm:col-span-1">
             <TextField
               id="prop-state"
-              label="State"
+              label="Estado"
               value={value.state}
               maxLength={2}
               transform={(raw) => raw.toUpperCase()}
@@ -87,7 +86,7 @@ export function PropertyInfoCard({
           <div className="sm:col-span-2">
             <TextField
               id="prop-zip"
-              label="Zip Code"
+              label="Código Postal"
               value={value.zip}
               maxLength={5}
               transform={(raw) => raw.replace(/[^\d]/g, "")}
@@ -102,16 +101,22 @@ export function PropertyInfoCard({
 }
 
 // ---------------------------------------------------------------------------
-// Universal offer email (works for every strategy)
+// Email de oferta
 // ---------------------------------------------------------------------------
 
 const EMAIL_TONES: EmailTone[] = ["warm", "direct", "soft-follow-up"]
 
-type EmailLanguage = "english" | "spanish"
+const EMAIL_TONE_LABELS_ES: Record<EmailTone, string> = {
+  warm: "Cálido y Respetuoso",
+  direct: "Directo de Inversionista",
+  "soft-follow-up": "Seguimiento Suave",
+}
+
+type EmailLanguage = "spanish" | "english"
 
 const EMAIL_LANGUAGE_LABELS: Record<EmailLanguage, string> = {
-  english: "English",
   spanish: "Español",
+  english: "Inglés",
 }
 
 function buildSpanishOfferEmail({
@@ -145,7 +150,7 @@ function buildSpanishOfferEmail({
       "",
       `Te escribo sobre la propiedad ubicada en ${property}.`,
       "",
-      `Después de revisar los números, las reparaciones y las condiciones actuales del mercado, me gustaría presentar una oferta en efectivo/as-is de ${amount}.`,
+      `Después de revisar los números, las reparaciones y las condiciones actuales del mercado, me gustaría presentar una oferta as-is de ${amount}.`,
       "",
       "Con una oferta as-is, no tendrías que hacer reparaciones ni mejoras antes de vender. También puedo trabajar con el tiempo de cierre que sea más conveniente para ti.",
       "",
@@ -210,10 +215,8 @@ export function OfferEmail({
   const [offerAmount, setOfferAmount] = useState(calculatedOffer)
   const [offerEdited, setOfferEdited] = useState(false)
   const [tone, setTone] = useState<EmailTone>("warm")
-  const [language, setLanguage] = useState<EmailLanguage>("english")
+  const [language, setLanguage] = useState<EmailLanguage>("spanish")
 
-  // The offer defaults to the calculated value but the student may override it.
-  // Until they edit it, keep it in sync with the selected strategy's offer.
   useEffect(() => {
     if (!offerEdited) setOfferAmount(calculatedOffer)
   }, [calculatedOffer, offerEdited])
@@ -240,16 +243,17 @@ export function OfferEmail({
     })
   }, [propertyAddress, recipientName, studentName, studentPhone, offerAmount, tone, language])
 
-  const generatedText = `Subject: ${generated.subject}\n\n${generated.body}`
+  const subjectLabel = language === "spanish" ? "Asunto" : "Subject"
+  const generatedText = `${subjectLabel}: ${generated.subject}\n\n${generated.body}`
 
-  // The preview is editable. We track edits separately and reset whenever the
-  // generated email changes (e.g. a field, tone, or language change) so it stays in sync.
   const [editedText, setEditedText] = useState(generatedText)
+
   useEffect(() => {
     setEditedText(generatedText)
   }, [generatedText])
 
   const [copied, setCopied] = useState(false)
+
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(editedText)
@@ -265,10 +269,10 @@ export function OfferEmail({
       <CardHeader>
         <div className="flex items-center gap-2">
           <Mail className="size-5 text-muted-foreground" />
-          <CardTitle className="text-lg">Offer Email</CardTitle>
+          <CardTitle className="text-lg">Email de Oferta</CardTitle>
         </div>
         <CardDescription>
-          Fill in the yellow fields, choose the language and tone, then copy the email to send to the seller.
+          Completa los campos amarillos, elige el idioma y el tono, y copia el email para enviarlo al vendedor.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
@@ -277,66 +281,66 @@ export function OfferEmail({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField
             id="email-recipient"
-            label="Recipient Name"
+            label="Nombre del Vendedor"
             value={recipientName}
             onValueChange={setRecipientName}
-            placeholder="Seller name"
+            placeholder="Nombre del vendedor"
           />
           <TextField
             id="email-student"
-            label="Student Name"
+            label="Tu Nombre"
             value={studentName}
             onValueChange={setStudentName}
-            placeholder="Your name"
+            placeholder="Tu nombre"
           />
           <TextField
             id="email-phone"
-            label="Student Phone"
+            label="Tu Teléfono"
             value={studentPhone}
             onValueChange={setStudentPhone}
             placeholder="(555) 123-4567"
           />
           <NumberField
             id="email-offer"
-            label="Offer Amount"
+            label="Monto de la Oferta"
             prefix="$"
             value={offerAmount}
             onValueChange={(v) => {
               setOfferEdited(true)
               setOfferAmount(v)
             }}
-            hint="Defaults to the calculated offer. Edit to override."
+            hint="Por defecto usa la oferta calculada. Puedes editarla si necesitas ajustarla."
           />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email-language" className="text-sm">
-              Email Language
+              Idioma del Email
             </Label>
             <Select value={language} onValueChange={(v) => setLanguage(v as EmailLanguage)}>
               <SelectTrigger id="email-language" className="w-full">
                 <SelectValue>{(value) => EMAIL_LANGUAGE_LABELS[value as EmailLanguage]}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="english">{EMAIL_LANGUAGE_LABELS.english}</SelectItem>
                 <SelectItem value="spanish">{EMAIL_LANGUAGE_LABELS.spanish}</SelectItem>
+                <SelectItem value="english">{EMAIL_LANGUAGE_LABELS.english}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email-tone" className="text-sm">
-              Email Tone
+              Tono del Email
             </Label>
             <Select value={tone} onValueChange={(v) => setTone(v as EmailTone)}>
               <SelectTrigger id="email-tone" className="w-full">
-                <SelectValue>{(value) => EMAIL_TONE_LABELS[value as EmailTone]}</SelectValue>
+                <SelectValue>{(value) => EMAIL_TONE_LABELS_ES[value as EmailTone]}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {EMAIL_TONES.map((t) => (
                   <SelectItem key={t} value={t}>
-                    {EMAIL_TONE_LABELS[t]}
+                    {EMAIL_TONE_LABELS_ES[t]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -347,9 +351,9 @@ export function OfferEmail({
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col">
-              <h3 className="text-base font-semibold text-foreground">Email Preview</h3>
+              <h3 className="text-base font-semibold text-foreground">Vista Previa del Email</h3>
               <p className="text-sm text-muted-foreground">
-                You can edit the text below before copying.
+                Puedes editar el texto antes de copiarlo.
               </p>
             </div>
             <Button
@@ -358,14 +362,14 @@ export function OfferEmail({
               className="shrink-0"
             >
               {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-              {copied ? "Copied" : "Copy Email"}
+              {copied ? "Copiado" : "Copiar Email"}
             </Button>
           </div>
           <Textarea
             value={editedText}
             onChange={(e) => setEditedText(e.target.value)}
             className="min-h-96 font-sans text-sm leading-relaxed"
-            aria-label="Offer email preview"
+            aria-label="Vista previa del email de oferta"
           />
         </div>
       </CardContent>
@@ -374,7 +378,7 @@ export function OfferEmail({
 }
 
 // ---------------------------------------------------------------------------
-// Coach notes (simple Spanish)
+// Notas del Coach
 // ---------------------------------------------------------------------------
 
 export function CoachNotes({ children }: { children: React.ReactNode }) {
@@ -391,7 +395,7 @@ export function CoachNotes({ children }: { children: React.ReactNode }) {
 }
 
 // ---------------------------------------------------------------------------
-// Deal decision banner (Fix & Flip)
+// Banner de decisión
 // ---------------------------------------------------------------------------
 
 const DECISION_STYLES: Record<DealDecision, string> = {
