@@ -12,21 +12,21 @@ const STRATEGIES = [
   {
     title: "Wholesaling",
     description:
-      "Calculate your seller offer, assignment fee, and maximum allowable offer.",
+      "Calcula tu oferta al vendedor, assignment fee y MAO para proteger el margen del comprador final.",
     icon: KeyRound,
     href: "/new-analysis?strategy=wholesaling",
   },
   {
     title: "Fix & Flip",
     description:
-      "Estimate your offer, capital needed, carrying costs, cash back, net profit, and ROI.",
+      "Estima tu oferta, capital requerido, costos de mantenimiento, cash back, ganancia neta y ROI.",
     icon: Hammer,
     href: "/new-analysis?strategy=fix-and-flip",
   },
   {
     title: "Buy & Hold",
     description:
-      "Analyze rent, expenses, cash flow, cap rate, and cash-on-cash return.",
+      "Analiza renta, gastos, cash flow, CAP Rate y retorno Cash on Cash.",
     icon: Home,
     href: "/new-analysis?strategy=buy-and-hold",
   },
@@ -38,17 +38,17 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Welcome back, Money Flipper
+            Bienvenido de nuevo, Money Flipper
           </h1>
           <p className="text-sm text-muted-foreground">
-            Start a new analysis and calculate your deal with the Money Flip Method.
+            Inicia un nuevo análisis y calcula tu trato con el Money Flip Method.
           </p>
         </div>
 
         <Button asChild>
           <a href="/new-analysis?strategy=wholesaling">
             <FilePlus2 className="size-4" />
-            New Analysis
+            Nuevo Análisis
           </a>
         </Button>
       </div>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
 
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
-                  <a href={strategy.href}>Analyze Deal</a>
+                  <a href={strategy.href}>Analizar Trato</a>
                 </Button>
               </CardContent>
             </Card>
@@ -79,17 +79,17 @@ export default function DashboardPage() {
 
       <Card className="border-border/60">
         <CardHeader>
-          <CardTitle className="text-lg">How to use it</CardTitle>
+          <CardTitle className="text-lg">Cómo usar la herramienta</CardTitle>
           <CardDescription>
-            Keep it simple: enter the property numbers, choose the strategy, and use the results to make a smarter offer.
+            Mantenlo simple: ingresa los números de la propiedad, elige la estrategia y usa los resultados para hacer una oferta más inteligente.
           </CardDescription>
         </CardHeader>
 
         <CardContent className="grid gap-3 text-sm text-muted-foreground">
-          <p>1. Enter the property address and basic details.</p>
-          <p>2. Choose Wholesaling, Fix & Flip, or Buy & Hold.</p>
-          <p>3. Review the offer, profit, cash flow, or ROI before contacting the seller.</p>
-          <p>4. Use the offer email section to communicate professionally.</p>
+          <p>1. Ingresa la dirección de la propiedad y los datos básicos.</p>
+          <p>2. Elige Wholesaling, Fix & Flip o Buy & Hold.</p>
+          <p>3. Revisa la oferta, ganancia, cash flow o ROI antes de contactar al vendedor.</p>
+          <p>4. Usa la sección de email de oferta para comunicarte de forma profesional.</p>
         </CardContent>
       </Card>
     </div>
