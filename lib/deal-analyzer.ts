@@ -137,6 +137,7 @@ export interface FlipResults {
   minProfitRequired: number
   totalCarryingCosts: number
   capitalRequired: number
+  riskNotes: string[]
   decision: DealDecision
 }
 
@@ -196,7 +197,46 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
   // 13. Capital Required
   const capitalRequired = cashToClose + hmlInterest + i.holdingCosts
 
-  // 14. Deal Decision
+  // 14. Risk Notes
+  const riskNotes: string[] = []
+
+  if (i.actualSalePrice > 0 && i.actualSalePrice < i.arv) {
+    riskNotes.push("Actual Sale Price is below ARV. Review your exit strategy and resale assumptions.")
+  }
+
+  if (netProfit <= 0) {
+    riskNotes.push("This deal is currently showing no net profit. The offer, renovation budget, or sale price needs to be reviewed.")
+  }
+
+  if (netProfit > 0 && netProfit < minProfitRequired) {
+    riskNotes.push("Net profit is positive, but it is below your minimum expected ROI target.")
+  }
+
+  if (i.arv > 0 && i.renovationBudget / i.arv >= 0.25) {
+    riskNotes.push("Renovation budget is high compared to ARV. Verify repair estimates before making an offer.")
+  }
+
+  if (i.arv > 0 && cashToClose / i.arv >= 0.2) {
+    riskNotes.push("Cash needed to close is high compared to ARV. Confirm available capital before moving forward.")
+  }
+
+  if (i.timelineMonths >= 6) {
+    riskNotes.push("Project timeline is long. Higher timelines can increase interest, holding costs, and market risk.")
+  }
+
+  if (i.annualInterestPercent >= 13) {
+    riskNotes.push("Hard money interest rate is high. Review lender terms and compare financing options.")
+  }
+
+  if (i.pointsPercent >= 4) {
+    riskNotes.push("Hard money points are high. Confirm all lender fees before committing to the deal.")
+  }
+
+  if (riskNotes.length === 0) {
+    riskNotes.push("No major risk flags detected based on the current numbers. Still verify comps, repairs, financing, and market conditions.")
+  }
+
+  // 15. Deal Decision
   let decision: DealDecision
 
   if (netProfit <= 0) {
@@ -231,6 +271,7 @@ export function analyzeFlip(i: FlipInputs): FlipResults {
     minProfitRequired,
     totalCarryingCosts,
     capitalRequired,
+    riskNotes,
     decision,
   }
 }
