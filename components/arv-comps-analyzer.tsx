@@ -47,10 +47,16 @@ interface ArvCompsAnalyzerProps {
 }
 
 const CONDITION_LABELS: Record<Condition, string> = {
-  poor: "Poor",
-  average: "Average",
-  updated: "Updated",
-  renovated: "Fully Renovated",
+  poor: "Mala",
+  average: "Promedio",
+  updated: "Actualizada",
+  renovated: "Totalmente Renovada",
+}
+
+const CONFIDENCE_LABELS: Record<"Low" | "Medium" | "High", string> = {
+  Low: "Baja",
+  Medium: "Media",
+  High: "Alta",
 }
 
 const CONDITION_SCORE: Record<Condition, number> = {
@@ -150,7 +156,7 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
 
     const warning =
       values.length >= 2 && spreadPercent > 0.2
-        ? "These estimates are far apart. Verify comps before using this ARV."
+        ? "Los estimados están muy separados. Verifica propiedades comparables antes de usar este ARV."
         : ""
 
     return {
@@ -191,36 +197,36 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
     const warnings: string[] = []
 
     usableComps.forEach((comp, index) => {
-      const label = comp.address ? comp.address : `Comp ${index + 1}`
+      const label = comp.address ? comp.address : `Comparable ${index + 1}`
 
       if (subject.sqft > 0 && comp.sqft > 0) {
         const sizeDifference = Math.abs(comp.sqft - subject.sqft) / subject.sqft
         if (sizeDifference > 0.25) {
-          warnings.push(`${label} has a large sqft difference compared to the subject property.`)
+          warnings.push(`${label} tiene una diferencia grande de pies cuadrados frente a la propiedad analizada.`)
         }
       }
 
       if (comp.distance > 1) {
-        warnings.push(`${label} is more than 1 mile away.`)
+        warnings.push(`${label} está a más de 1 milla de distancia.`)
       }
 
       if (subject.yearBuilt > 0 && comp.yearBuilt > 0) {
         const yearDifference = Math.abs(comp.yearBuilt - subject.yearBuilt)
         if (yearDifference > 20) {
-          warnings.push(`${label} has a large year-built difference.`)
+          warnings.push(`${label} tiene una diferencia grande en el año de construcción.`)
         }
       }
 
       if (comp.beds > 0 && subject.beds > 0 && Math.abs(comp.beds - subject.beds) >= 2) {
-        warnings.push(`${label} has a large bedroom count difference.`)
+        warnings.push(`${label} tiene una diferencia grande en cantidad de habitaciones.`)
       }
 
       if (comp.baths > 0 && subject.baths > 0 && Math.abs(comp.baths - subject.baths) >= 1.5) {
-        warnings.push(`${label} has a large bathroom count difference.`)
+        warnings.push(`${label} tiene una diferencia grande en cantidad de baños.`)
       }
 
       if (CONDITION_SCORE[comp.condition] < CONDITION_SCORE[subject.condition] - 1) {
-        warnings.push(`${label} appears to be in lower condition than the target condition.`)
+        warnings.push(`${label} parece estar en una condición inferior a la condición objetivo.`)
       }
     })
 
@@ -251,10 +257,11 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Calculator className="size-5 text-foreground" />
-          <CardTitle className="text-lg">ARV Tools</CardTitle>
+          <CardTitle className="text-lg">Herramientas de ARV</CardTitle>
         </div>
         <CardDescription>
-          Optional tools. You can still enter your ARV manually without using this section.
+          Usa esta sección para comparar estimados y propiedades vendidas antes de tomar una decisión.
+          También puedes ingresar el ARV manualmente sin usar estas herramientas.
         </CardDescription>
       </CardHeader>
 
@@ -262,13 +269,14 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
         <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
           <div className="mb-2 flex items-center gap-2 font-semibold">
             <AlertTriangle className="size-4" />
-            Important Notice
+            Aviso Importante
           </div>
           <p>
-            The ARV values shown here are estimates based only on the numbers entered by the user.
-            Money Flip does not verify, guarantee, or certify the accuracy of the data entered.
-            These tools are for educational and analysis purposes only. Money Flip is not responsible
-            for investment decisions, offers, losses, or outcomes based on these estimates.
+            Los valores de ARV mostrados aquí son estimados basados únicamente en los números
+            ingresados por el usuario. Money Flip no verifica, garantiza ni certifica la exactitud
+            de la información ingresada. Estas herramientas son solo para fines educativos y de
+            análisis. Money Flip no es responsable por decisiones de inversión, ofertas, pérdidas
+            o resultados basados en estos estimados.
           </p>
 
           <label className="mt-4 flex items-start gap-2 text-sm">
@@ -279,44 +287,44 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
               className="mt-1"
             />
             <span>
-              I understand these ARV estimates are not guaranteed values and I am responsible for
-              verifying all numbers before making any offer or investment decision.
+              Entiendo que estos estimados de ARV no son valores garantizados y que soy responsable
+              de verificar todos los números antes de hacer una oferta o tomar una decisión de inversión.
             </span>
           </label>
         </div>
 
         <div className="rounded-lg border border-border/60 p-4">
-          <p className="mb-1 text-sm font-medium text-foreground">ARV Estimate Averager</p>
+          <p className="mb-1 text-sm font-medium text-foreground">Promedio de Estimados de ARV</p>
           <p className="mb-4 text-xs text-muted-foreground">
-            Enter estimates from platforms like Zillow, Redfin, Propwire, or another source. The app
-            will calculate a simple average.
+            Ingresa estimados de plataformas como Zillow, Redfin, Propwire u otra fuente. La
+            herramienta calculará un promedio simple.
           </p>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <NumberField
               id="arv-estimate-zillow"
-              label="Zillow Estimate"
+              label="Estimado de Zillow"
               prefix="$"
               value={marketEstimates.zillow}
               onValueChange={(v) => updateMarketEstimates({ zillow: v })}
             />
             <NumberField
               id="arv-estimate-redfin"
-              label="Redfin Estimate"
+              label="Estimado de Redfin"
               prefix="$"
               value={marketEstimates.redfin}
               onValueChange={(v) => updateMarketEstimates({ redfin: v })}
             />
             <NumberField
               id="arv-estimate-propwire"
-              label="Propwire Estimate"
+              label="Estimado de Propwire"
               prefix="$"
               value={marketEstimates.propwire}
               onValueChange={(v) => updateMarketEstimates({ propwire: v })}
             />
             <NumberField
               id="arv-estimate-other"
-              label="Other Estimate"
+              label="Otro Estimado"
               prefix="$"
               value={marketEstimates.other}
               onValueChange={(v) => updateMarketEstimates({ other: v })}
@@ -325,36 +333,36 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
 
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <ResultCard
-              label="Average Estimate"
+              label="Promedio Estimado"
               value={formatCurrency(estimateAnalysis.average)}
-              hint={`${estimateAnalysis.values.length} estimate(s) used`}
+              hint={`${estimateAnalysis.values.length} estimado(s) usado(s)`}
               emphasis="primary"
             />
             <ResultCard
-              label="Confidence"
-              value={estimateAnalysis.confidence}
-              hint="Based on number of estimates and spread"
+              label="Confianza"
+              value={CONFIDENCE_LABELS[estimateAnalysis.confidence]}
+              hint="Basado en cantidad de estimados y diferencia entre ellos"
             />
             <ResultCard
-              label="Lowest Estimate"
+              label="Estimado Más Bajo"
               value={formatCurrency(estimateAnalysis.low)}
-              hint="Most conservative platform estimate"
+              hint="Estimado más conservador"
             />
             <ResultCard
-              label="Highest Estimate"
+              label="Estimado Más Alto"
               value={formatCurrency(estimateAnalysis.high)}
-              hint="Most aggressive platform estimate"
+              hint="Estimado más agresivo"
             />
             <ResultCard
-              label="Spread"
+              label="Diferencia"
               value={formatCurrency(estimateAnalysis.spread)}
-              hint="Difference between high and low"
+              hint="Diferencia entre el estimado alto y bajo"
             />
           </div>
 
           {estimateAnalysis.warning ? (
             <div className="mt-4 rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-900">
-              <p className="font-semibold">Review estimate spread</p>
+              <p className="font-semibold">Revisa la diferencia entre estimados</p>
               <p>{estimateAnalysis.warning}</p>
             </div>
           ) : null}
@@ -365,42 +373,42 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
               onClick={() => onUseArv(Math.round(estimateAnalysis.average))}
               disabled={!canUseEstimateAverage}
             >
-              Use Average as ARV
+              Usar Promedio como ARV
             </Button>
           </div>
         </div>
 
         <div className="rounded-lg border border-border/60 p-4">
-          <p className="mb-1 text-sm font-medium text-foreground">ARV Comps Analyzer</p>
+          <p className="mb-1 text-sm font-medium text-foreground">Analizador de Comparables</p>
           <p className="mb-4 text-xs text-muted-foreground">
-            Optional advanced check using up to 5 comparable sold properties entered by the user.
+            Revisión avanzada usando hasta 5 propiedades comparables vendidas ingresadas por el usuario.
           </p>
 
           <div className="rounded-lg border border-border/60 p-4">
-            <p className="mb-3 text-sm font-medium text-foreground">Subject Property</p>
+            <p className="mb-3 text-sm font-medium text-foreground">Propiedad Analizada</p>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumberField
                 id="arv-subject-sqft"
-                label="Subject Sqft"
+                label="Pies Cuadrados"
                 value={subject.sqft}
                 onValueChange={(v) => updateSubject({ sqft: v })}
               />
               <NumberField
                 id="arv-subject-beds"
-                label="Subject Beds"
+                label="Habitaciones"
                 value={subject.beds}
                 onValueChange={(v) => updateSubject({ beds: v })}
               />
               <NumberField
                 id="arv-subject-baths"
-                label="Subject Baths"
+                label="Baños"
                 value={subject.baths}
                 onValueChange={(v) => updateSubject({ baths: v })}
               />
               <NumberField
                 id="arv-subject-year"
-                label="Subject Year Built"
+                label="Año de Construcción"
                 value={subject.yearBuilt}
                 onValueChange={(v) => updateSubject({ yearBuilt: v })}
               />
@@ -410,7 +418,7 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
                   htmlFor="arv-subject-condition"
                   className="text-sm font-medium text-foreground"
                 >
-                  Target Condition
+                  Condición Objetivo
                 </label>
                 <select
                   id="arv-subject-condition"
@@ -444,7 +452,7 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
                       onClick={() => removeComp(comp.id)}
                     >
                       <Trash2 className="size-4" />
-                      Remove
+                      Eliminar
                     </Button>
                   )}
                 </div>
@@ -454,7 +462,7 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
                     htmlFor={`arv-comp-address-${comp.id}`}
                     className="text-sm font-medium text-foreground"
                   >
-                    Address
+                    Dirección
                   </label>
                   <input
                     id={`arv-comp-address-${comp.id}`}
@@ -468,38 +476,38 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <NumberField
                     id={`arv-comp-sold-${comp.id}`}
-                    label="Sold Price"
+                    label="Precio de Venta"
                     prefix="$"
                     value={comp.soldPrice}
                     onValueChange={(v) => updateComp(comp.id, { soldPrice: v })}
                   />
                   <NumberField
                     id={`arv-comp-sqft-${comp.id}`}
-                    label="Sqft"
+                    label="Pies Cuadrados"
                     value={comp.sqft}
                     onValueChange={(v) => updateComp(comp.id, { sqft: v })}
                   />
                   <NumberField
                     id={`arv-comp-beds-${comp.id}`}
-                    label="Beds"
+                    label="Habitaciones"
                     value={comp.beds}
                     onValueChange={(v) => updateComp(comp.id, { beds: v })}
                   />
                   <NumberField
                     id={`arv-comp-baths-${comp.id}`}
-                    label="Baths"
+                    label="Baños"
                     value={comp.baths}
                     onValueChange={(v) => updateComp(comp.id, { baths: v })}
                   />
                   <NumberField
                     id={`arv-comp-year-${comp.id}`}
-                    label="Year Built"
+                    label="Año de Construcción"
                     value={comp.yearBuilt}
                     onValueChange={(v) => updateComp(comp.id, { yearBuilt: v })}
                   />
                   <NumberField
                     id={`arv-comp-distance-${comp.id}`}
-                    label="Distance"
+                    label="Distancia"
                     suffix="mi"
                     value={comp.distance}
                     allowDecimal
@@ -511,7 +519,7 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
                       htmlFor={`arv-comp-condition-${comp.id}`}
                       className="text-sm font-medium text-foreground"
                     >
-                      Condition
+                      Condición
                     </label>
                     <select
                       id={`arv-comp-condition-${comp.id}`}
@@ -536,37 +544,37 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
           <div className="mt-4">
             <Button type="button" variant="outline" onClick={addComp} disabled={comps.length >= 5}>
               <Plus className="size-4" />
-              Add Comparable
+              Agregar Comparable
             </Button>
           </div>
 
           <div className="mt-4 rounded-lg border border-border/60 bg-muted/40 p-4">
-            <p className="mb-3 text-sm font-medium text-foreground">Comps ARV Result</p>
+            <p className="mb-3 text-sm font-medium text-foreground">Resultado del ARV por Comparables</p>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <ResultCard
-                label="Comps Suggested ARV"
+                label="ARV Sugerido"
                 value={formatCurrency(compsAnalysis.suggestedArv)}
-                hint="Based on average comp price per sqft"
+                hint="Basado en el precio promedio por pie cuadrado"
                 emphasis="primary"
               />
               <ResultCard
-                label="Average $/Sqft"
+                label="Promedio $/Pie²"
                 value={formatCurrency(compsAnalysis.averagePricePerSqft)}
-                hint={`${compsAnalysis.usableComps.length} comparable(s) used`}
+                hint={`${compsAnalysis.usableComps.length} comparable(s) usado(s)`}
               />
-              <ResultCard label="Low ARV" value={formatCurrency(compsAnalysis.lowArv)} hint="-5%" />
-              <ResultCard label="High ARV" value={formatCurrency(compsAnalysis.highArv)} hint="+5%" />
+              <ResultCard label="ARV Bajo" value={formatCurrency(compsAnalysis.lowArv)} hint="-5%" />
+              <ResultCard label="ARV Alto" value={formatCurrency(compsAnalysis.highArv)} hint="+5%" />
               <ResultCard
-                label="Confidence"
-                value={compsAnalysis.confidence}
-                hint="Based on comp count and similarity"
+                label="Confianza"
+                value={CONFIDENCE_LABELS[compsAnalysis.confidence]}
+                hint="Basado en cantidad y similitud de comparables"
               />
             </div>
 
             {compsAnalysis.warnings.length > 0 && (
               <div className="mt-4 rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-900">
-                <p className="mb-2 font-semibold">Review these comps:</p>
+                <p className="mb-2 font-semibold">Revisa estos comparables:</p>
                 <ul className="list-inside list-disc space-y-1">
                   {compsAnalysis.warnings.map((warning) => (
                     <li key={warning}>{warning}</li>
@@ -581,7 +589,7 @@ export function ArvCompsAnalyzer({ onUseArv }: ArvCompsAnalyzerProps) {
                 onClick={() => onUseArv(Math.round(compsAnalysis.suggestedArv))}
                 disabled={!canUseCompsArv}
               >
-                Use Comps ARV
+                Usar ARV por Comparables
               </Button>
             </div>
           </div>
