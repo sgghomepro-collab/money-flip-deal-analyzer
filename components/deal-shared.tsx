@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils"
 import {
   buildOfferEmail,
   EMAIL_TONE_LABELS,
+  formatCurrency,
   type DealDecision,
   type EmailTone,
   type PropertyInfo,
@@ -106,6 +107,96 @@ export function PropertyInfoCard({
 
 const EMAIL_TONES: EmailTone[] = ["warm", "direct", "soft-follow-up"]
 
+type EmailLanguage = "english" | "spanish"
+
+const EMAIL_LANGUAGE_LABELS: Record<EmailLanguage, string> = {
+  english: "English",
+  spanish: "Español",
+}
+
+function buildSpanishOfferEmail({
+  propertyAddress,
+  recipientName,
+  studentName,
+  studentPhone,
+  offerAmount,
+  tone,
+}: {
+  propertyAddress: string
+  recipientName: string
+  studentName: string
+  studentPhone: string
+  offerAmount: number
+  tone: EmailTone
+}) {
+  const property = propertyAddress || "[Dirección de la Propiedad]"
+  const recipient = recipientName || "[Nombre del Vendedor]"
+  const name = studentName || "[Tu Nombre]"
+  const phone = studentPhone || "[Tu Teléfono]"
+  const amount = offerAmount > 0 ? formatCurrency(offerAmount) : "[Monto de la Oferta]"
+
+  const subject = `Oferta por ${property}`
+
+  let body: string
+
+  if (tone === "direct") {
+    body = [
+      `Hola ${recipient},`,
+      "",
+      `Te escribo sobre la propiedad ubicada en ${property}.`,
+      "",
+      `Después de revisar los números, las reparaciones y las condiciones actuales del mercado, me gustaría presentar una oferta en efectivo/as-is de ${amount}.`,
+      "",
+      "Con una oferta as-is, no tendrías que hacer reparaciones ni mejoras antes de vender. También puedo trabajar con el tiempo de cierre que sea más conveniente para ti.",
+      "",
+      "Si esta oferta te funciona, podemos revisar los próximos pasos.",
+      "",
+      "Gracias por tu tiempo,",
+      "",
+      name,
+      phone,
+    ].join("\n")
+  } else if (tone === "soft-follow-up") {
+    body = [
+      `Hola ${recipient},`,
+      "",
+      "Quería hacer seguimiento y ver si ahora sería un mejor momento para conversar.",
+      "",
+      `Sigo interesado en la propiedad ubicada en ${property}, y me gustaría presentar una oferta de ${amount}.`,
+      "",
+      "La oferta sería as-is, así que no tendrías que hacer reparaciones ni mejoras antes de vender. También puedo adaptarme al tiempo de cierre que prefieras.",
+      "",
+      "Sin presión. Si quieres revisarlo, estoy disponible cuando te quede bien.",
+      "",
+      "Gracias por tu tiempo,",
+      "",
+      name,
+      phone,
+    ].join("\n")
+  } else {
+    body = [
+      `Hola ${recipient},`,
+      "",
+      "Espero que estés muy bien.",
+      "",
+      `Te escribo sobre la propiedad ubicada en ${property}. Entiendo que vender una propiedad es una decisión importante, y mi intención es hacer el proceso lo más claro, sencillo y respetuoso posible.`,
+      "",
+      `Después de revisar los números, las reparaciones y las condiciones actuales del mercado, me gustaría presentar una oferta de ${amount}.`,
+      "",
+      "Esta sería una oferta as-is, lo que significa que no tendrías que hacer reparaciones ni mejoras antes de vender. También puedo trabajar con el tiempo de cierre que sea más conveniente para ti.",
+      "",
+      "Si es algo que considerarías, con gusto podemos hablar de los próximos pasos.",
+      "",
+      "Gracias por tu tiempo,",
+      "",
+      name,
+      phone,
+    ].join("\n")
+  }
+
+  return { subject, body }
+}
+
 export function OfferEmail({
   propertyAddress,
   calculatedOffer,
@@ -119,6 +210,7 @@ export function OfferEmail({
   const [offerAmount, setOfferAmount] = useState(calculatedOffer)
   const [offerEdited, setOfferEdited] = useState(false)
   const [tone, setTone] = useState<EmailTone>("warm")
+  const [language, setLanguage] = useState<EmailLanguage>("english")
 
   // The offer defaults to the calculated value but the student may override it.
   // Until they edit it, keep it in sync with the selected strategy's offer.
@@ -126,23 +218,32 @@ export function OfferEmail({
     if (!offerEdited) setOfferAmount(calculatedOffer)
   }, [calculatedOffer, offerEdited])
 
-  const generated = useMemo(
-    () =>
-      buildOfferEmail({
+  const generated = useMemo(() => {
+    if (language === "spanish") {
+      return buildSpanishOfferEmail({
         propertyAddress,
         recipientName,
         studentName,
         studentPhone,
         offerAmount,
         tone,
-      }),
-    [propertyAddress, recipientName, studentName, studentPhone, offerAmount, tone],
-  )
+      })
+    }
+
+    return buildOfferEmail({
+      propertyAddress,
+      recipientName,
+      studentName,
+      studentPhone,
+      offerAmount,
+      tone,
+    })
+  }, [propertyAddress, recipientName, studentName, studentPhone, offerAmount, tone, language])
 
   const generatedText = `Subject: ${generated.subject}\n\n${generated.body}`
 
   // The preview is editable. We track edits separately and reset whenever the
-  // generated email changes (e.g. a field or tone change) so it stays in sync.
+  // generated email changes (e.g. a field, tone, or language change) so it stays in sync.
   const [editedText, setEditedText] = useState(generatedText)
   useEffect(() => {
     setEditedText(generatedText)
@@ -167,7 +268,7 @@ export function OfferEmail({
           <CardTitle className="text-lg">Offer Email</CardTitle>
         </div>
         <CardDescription>
-          Fill in the yellow fields, pick a tone, then copy the email to send to the seller.
+          Fill in the yellow fields, choose the language and tone, then copy the email to send to the seller.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
@@ -208,22 +309,39 @@ export function OfferEmail({
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="email-tone" className="text-sm">
-            Email Tone
-          </Label>
-          <Select value={tone} onValueChange={(v) => setTone(v as EmailTone)}>
-            <SelectTrigger id="email-tone" className="w-full">
-              <SelectValue>{(value) => EMAIL_TONE_LABELS[value as EmailTone]}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {EMAIL_TONES.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {EMAIL_TONE_LABELS[t]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email-language" className="text-sm">
+              Email Language
+            </Label>
+            <Select value={language} onValueChange={(v) => setLanguage(v as EmailLanguage)}>
+              <SelectTrigger id="email-language" className="w-full">
+                <SelectValue>{(value) => EMAIL_LANGUAGE_LABELS[value as EmailLanguage]}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="english">{EMAIL_LANGUAGE_LABELS.english}</SelectItem>
+                <SelectItem value="spanish">{EMAIL_LANGUAGE_LABELS.spanish}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email-tone" className="text-sm">
+              Email Tone
+            </Label>
+            <Select value={tone} onValueChange={(v) => setTone(v as EmailTone)}>
+              <SelectTrigger id="email-tone" className="w-full">
+                <SelectValue>{(value) => EMAIL_TONE_LABELS[value as EmailTone]}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {EMAIL_TONES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {EMAIL_TONE_LABELS[t]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">
