@@ -62,6 +62,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
       "",
       `Property: ${propertyAddress}`,
       `Decision: ${r.decision}`,
+      `Deal Score: ${r.dealScore}/100 - ${r.dealScoreLabel}`,
       "",
       `ARV: ${formatCurrency(inputs.arv)}`,
       `Actual Sale Price: ${formatCurrency(inputs.actualSalePrice)}`,
@@ -279,6 +280,30 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
           </CardHeader>
 
           <CardContent className="flex flex-col gap-4">
+            <div className="rounded-lg border-2 border-primary/40 bg-primary/10 p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    Deal Score
+                  </p>
+                  <p className="text-4xl font-bold tabular-nums text-primary">
+                    {r.dealScore}/100
+                  </p>
+                </div>
+
+                <div className="rounded-full border border-primary/30 bg-background px-4 py-2 text-sm font-semibold text-primary">
+                  {r.dealScoreLabel}
+                </div>
+              </div>
+
+              <div className="mt-4 h-3 overflow-hidden rounded-full bg-background">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${r.dealScore}%` }}
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <ResultCard
                 label="Sale Price Used"
@@ -329,9 +354,7 @@ export function FlipPanel({ property }: { property: PropertyInfo }) {
             </div>
 
             <div className="rounded-lg border-2 border-amber-500 bg-amber-200 p-4 text-amber-950 shadow-sm">
-              <p className="mb-3 text-xs font-bold uppercase tracking-wide">
-                Risk Notes
-              </p>
+              <p className="mb-3 text-xs font-bold uppercase tracking-wide">Risk Notes</p>
 
               <ul className="flex list-disc flex-col gap-2 pl-5 text-sm font-medium">
                 {r.riskNotes.map((note) => (
