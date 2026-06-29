@@ -87,26 +87,78 @@ export function analyzeWholesale(i: WholesaleInputs): WholesaleResults {
   const sellerOffer = mao - i.assignmentFee
   const estimatedProfit = i.assignmentFee
 
+  const repairRatio = i.arv > 0 ? i.repairs / i.arv : 0
+  const sellerOfferRatio = i.arv > 0 ? sellerOffer / i.arv : 0
+  const assignmentFeeRatio = mao > 0 ? i.assignmentFee / mao : 0
+
   let dealScore = 50
 
-  if (estimatedProfit >= 20000) dealScore += 25
-  else if (estimatedProfit >= 10000) dealScore += 15
-  else if (estimatedProfit >= 5000) dealScore += 5
-  else dealScore -= 15
+  // 1. Discount protection rule.
+  // Wholesaling must protect the backend for the fix & flipper.
+  // Below 30% discount, the deal becomes risky and should not be Strong.
+  if (i.discountPercent >= 35) {
+    dealScore += 25
+  } else if (i.discountPercent >= 30) {
+    dealScore += 18
+  } else if (i.discountPercent >= 25) {
+    dealScore -= 5
+  } else {
+    dealScore -= 25
+  }
 
-  if (i.discountPercent >= 35) dealScore += 15
-  else if (i.discountPercent >= 30) dealScore += 10
-  else if (i.discountPercent >= 25) dealScore += 5
-  else dealScore -= 10
+  // 2. Repair risk.
+  if (repairRatio > 0 && repairRatio <= 0.15) {
+    dealScore += 12
+  } else if (repairRatio > 0 && repairRatio <= 0.25) {
+    dealScore += 5
+  } else if (repairRatio > 0.25) {
+    dealScore -= 12
+  }
 
-  if (i.arv > 0 && i.repairs / i.arv <= 0.15) dealScore += 10
-  else if (i.arv > 0 && i.repairs / i.arv <= 0.25) dealScore += 5
-  else dealScore -= 10
+  // 3. Seller offer position versus ARV.
+  // Lower seller offer creates more room for the end buyer.
+  if (sellerOffer > 0 && sellerOfferRatio <= 0.5) {
+    dealScore += 15
+  } else if (sellerOffer > 0 && sellerOfferRatio <= 0.6) {
+    dealScore += 10
+  } else if (sellerOffer > 0 && sellerOfferRatio <= 0.7) {
+    dealScore += 2
+  } else if (sellerOffer > 0 && sellerOfferRatio > 0.7) {
+    dealScore -= 15
+  }
 
-  if (sellerOffer <= 0) dealScore -= 25
-  if (mao <= 0) dealScore -= 25
-  if (sellerOffer > 0 && i.arv > 0 && sellerOffer / i.arv <= 0.55) dealScore += 10
-  if (sellerOffer > 0 && i.arv > 0 && sellerOffer / i.arv >= 0.75) dealScore -= 10
+  // 4. Assignment fee should not automatically make the deal stronger.
+  // A higher fee can be good only if the backend still works and the seller offer is realistic.
+  if (estimatedProfit <= 0) {
+    dealScore -= 30
+  } else if (estimatedProfit < 5000) {
+    dealScore -= 10
+  } else if (estimatedProfit >= 5000 && estimatedProfit <= 15000) {
+    dealScore += 5
+  }
+
+  // 5. Assignment fee too high compared to MAO can make the contract harder to sell.
+  if (assignmentFeeRatio > 0.25) {
+    dealScore -= 15
+  } else if (assignmentFeeRatio > 0.2) {
+    dealScore -= 8
+  }
+
+  // 6. Invalid or dangerous numbers.
+  if (sellerOffer <= 0) dealScore -= 30
+  if (mao <= 0) dealScore -= 30
+  if (i.arv <= 0) dealScore -= 30
+
+  // 7. Hard caps based on discount rule.
+  // Less than 30% should never be Strong.
+  if (i.discountPercent < 30) {
+    dealScore = Math.min(dealScore, 79)
+  }
+
+  // Less than 25% should be Weak because the backend is usually too risky.
+  if (i.discountPercent < 25) {
+    dealScore = Math.min(dealScore, 59)
+  }
 
   dealScore = Math.max(0, Math.min(100, Math.round(dealScore)))
   const dealScoreLabel = getDealScoreLabel(dealScore)
